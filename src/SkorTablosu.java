@@ -46,12 +46,19 @@ public class SkorTablosu {
             // Her {} bloğunu ayır
             String[] parcalar = temiz.split("\\},\\s*\\{");
             for (String p : parcalar) {
-                p = p.replace("{", "").replace("}", "").trim();
-                String isim  = degerCek(p, "isim");
-                String tarih = degerCek(p, "tarih");
-                int skor2    = Integer.parseInt(degerCek(p, "skor"));
-                int seviye2  = Integer.parseInt(degerCek(p, "seviye"));
-                liste.add(new SkorGirisi(isim, skor2, seviye2, tarih));
+                try {
+                    p = p.replace("{", "").replace("}", "").trim();
+                    String isim  = degerCek(p, "isim");
+                    String tarih = degerCek(p, "tarih");
+                    String skorStr  = degerCek(p, "skor");
+                    String sevStr   = degerCek(p, "seviye");
+                    if (isim.isBlank() || skorStr.isBlank()) continue; // bozuk satırı atla
+                    int skor2   = Integer.parseInt(skorStr.trim());
+                    int seviye2 = sevStr.isBlank() ? 0 : Integer.parseInt(sevStr.trim());
+                    liste.add(new SkorGirisi(isim, skor2, seviye2, tarih));
+                } catch (Exception ex) {
+                    System.err.println("Satır parse hatası, atlanıyor: " + p);
+                }
             }
             Collections.sort(liste);
         } catch (Exception e) {
