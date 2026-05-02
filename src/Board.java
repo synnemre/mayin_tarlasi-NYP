@@ -125,6 +125,8 @@ public class Board {
      * Called by the lives system after a mine hit:
      * removes the mine from the board so play can continue,
      * recalculates neighbour counts, and re-opens the cell safely.
+     * Also redistributes mines so the removed mine reappears elsewhere
+     * (prevents accidental instant-win after hitting a mine).
      */
     public void mineHitRecover(int satir, int sutun) {
         if (!sinirIcindeMi(satir, sutun)) return;
@@ -132,8 +134,32 @@ public class Board {
         if (hucre.isMayinMi()) {
             hucre.setMayin(false);
             toplamMayin--;
-            // Close the cell so it can be safely re-opened (flood-fill won't re-enter closed cells)
+            // Close the cell so it can be safely re-opened
             hucre.kapat();
+
+            // Redistribute: place 1 new mine somewhere that is closed, not this cell, not a mine
+            Set<Integer> guvenli = new HashSet<>();
+            guvenli.add(satir * sutunSayisi + sutun);
+            // also exclude already-opened cells
+            for (int s = 0; s < satirSayisi; s++)
+                for (int u = 0; u < sutunSayisi; u++)
+                    if (izgara[s][u].isAcildiMi()) guvenli.add(s * sutunSayisi + u);
+
+            java.util.List<int[]> candidates = new java.util.ArrayList<>();
+            for (int s = 0; s < satirSayisi; s++)
+                for (int u = 0; u < sutunSayisi; u++)
+                    if (!izgara[s][u].isMayinMi() && !guvenli.contains(s * sutunSayisi + u))
+                        candidates.add(new int[]{s, u});
+
+            if (!candidates.isEmpty()) {
+                int[] c = candidates.get(new SecureRandom().nextInt(candidates.size()));
+                izgara[c[0]][c[1]].setMayin(true);
+                toplamMayin++;
+            }
+            // Note: if no candidate found (board nearly complete), toplamMayin stays decremented.
+            // kapaliGuvenliHucre is still > 0 because the hit cell was just reopened via ac(),
+            // so kazanildiMi() won't fire spuriously.
+
             komsuMayinlariHesapla();
             // Open it again — now it's safe
             ac(satir, sutun, true);
