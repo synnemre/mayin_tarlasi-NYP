@@ -392,6 +392,7 @@ public class MinesweeperApp extends Application {
         if (leblebi) {
             marketPanelOlustur();
             kokDuzen.setRight(marketPanel);
+            marketPanelGuncelle(); // disable all buttons at start (0 points)
         }
 
         temayiUygula();
@@ -476,7 +477,7 @@ public class MinesweeperApp extends Application {
     }
 
     private void guncelleUstBar() {
-        String mayinSimge = leblebModu ? "🪱 " : "💣 ";
+        String mayinSimge = leblebModu ? "🐍 " : "💣 ";
         maynSayaciEtiketi.setText(mayinSimge + (mayinSayisi - yerlestirilenIsaret));
         if (leblebModu && leblebiBoardMode != null) {
             zamanlayiciEtiketi.setText("⏳ " + leblebiBoardMode.getKalanSure() + "s");
@@ -498,8 +499,8 @@ public class MinesweeperApp extends Application {
 
     private void izgarayiOlustur() {
         izgaraDuzen = new GridPane();
-        izgaraDuzen.setHgap(2);
-        izgaraDuzen.setVgap(2);
+        izgaraDuzen.setHgap(3);
+        izgaraDuzen.setVgap(3);
         izgaraDuzen.setAlignment(Pos.CENTER);
 
         dugmeler = new Button[satirSayisi][sutunSayisi];
@@ -799,10 +800,20 @@ public class MinesweeperApp extends Application {
 
     private void isaretKoy(int s, int u) {
         if (tahta == null) return;
-        boolean isaretliydi = tahta.getHucre(s, u).isIsaretlendi();
-        tahta.getHucre(s, u).isaretiBegistir();
+        Cell hucre = tahta.getHucre(s, u);
+        if (hucre.isAcildiMi()) return;
+
+        boolean isaretliydi = hucre.isIsaretlendi();
+
+        // Yeni bayrak koyacaksak ama sayaç sıfıra geldi mi? İzin verme.
+        if (!isaretliydi && yerlestirilenIsaret >= mayinSayisi) return;
+
+        hucre.isaretiBegistir();
         yerlestirilenIsaret += isaretliydi ? -1 : 1;
-        maynSayaciEtiketi.setText((leblebModu ? "🪱 " : "💣 ") + (mayinSayisi - yerlestirilenIsaret));
+        yerlestirilenIsaret = Math.max(0, yerlestirilenIsaret); // hiçbir zaman negatife düşmesin
+
+        String simge = leblebModu ? "🐍 " : "💣 ";
+        maynSayaciEtiketi.setText(simge + (mayinSayisi - yerlestirilenIsaret));
     }
 
     // ── Zamanlayıcı ───────────────────────────────────────────────────────────
@@ -819,7 +830,12 @@ public class MinesweeperApp extends Application {
                 zamanlayiciEtiketi.setText("⏳ " + kalan + "s");
                 if (kalan <= 15)
                     zamanlayiciEtiketi.setStyle(
-                        "-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #e74c3c;");
+                        "-fx-font-size: 19px; -fx-font-weight: bold; -fx-padding: 4 12 4 12;" +
+                        "-fx-background-radius: 8; -fx-text-fill: #e74c3c;");
+                else
+                    zamanlayiciEtiketi.setStyle(
+                        "-fx-font-size: 19px; -fx-font-weight: bold; -fx-padding: 4 12 4 12;" +
+                        "-fx-background-radius: 8;");
                 if (leblebiBoardMode.isOyunBitti()) {
                     zamanlayici.stop();
                     arayuzuGuncelle();
@@ -840,7 +856,17 @@ public class MinesweeperApp extends Application {
         yerlestirilenIsaret = 0;
         yilanHucreleri.clear();
         durumEtiketi.setText("");
-        zamanlayiciEtiketi.setStyle("-fx-font-size: 15px; -fx-font-weight: bold;");
+
+        // Reset label styles to original (prevents shrinking after timer warning style)
+        String hudLabelStil  = "-fx-font-size: 19px; -fx-font-weight: bold; -fx-padding: 4 12 4 12;" +
+                               "-fx-background-radius: 8;";
+        String hudPuanStil   = "-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #f0c040;" +
+                               "-fx-padding: 4 12 4 12; -fx-background-radius: 8;";
+        zamanlayiciEtiketi.setStyle(hudLabelStil + (leblebModu ? "-fx-text-fill:#cdd6f4;" : ""));
+        puanEtiketi.setStyle(hudPuanStil);
+        canEtiketi.setStyle(hudLabelStil + "-fx-text-fill: #ff6b6b;");
+        durumEtiketi.setStyle("-fx-font-size: 15px; -fx-font-weight: bold;");
+        sifirlaBtn.setText(leblebModu ? "🌾" : "😊");
 
         if (leblebModu) {
             leblebiBoardMode = new LeblebiBoardMode(
@@ -904,9 +930,12 @@ public class MinesweeperApp extends Application {
 
                 Button btn = dugmeler[s][u];
 
-                if (nyDurum == 3) { // opened mine (oyun bitti, tüm mayınlar açıldı)
-                    btn.setText(leblebModu ? "🐍" : "💣");
-                    btn.setGraphic(null); // her zaman emoji kullan — daha tutarlı
+                if (nyDurum == 3) { // opened mine
+                    String mineEmoji = leblebModu ? "🐍" : "💣";
+                    Label mineL = new Label(mineEmoji);
+                    mineL.setStyle("-fx-font-size:20px;");
+                    btn.setText("");
+                    btn.setGraphic(mineL);
                     btn.setStyle(mayinHucreTarzi());
                     btn.setDisable(true);
                 } else if (nyDurum >= 10) { // opened safe (10 + neighbourCount)
@@ -916,15 +945,10 @@ public class MinesweeperApp extends Application {
                     btn.setStyle(acilmisHucreTarzi(k, sayiRenk));
                     btn.setDisable(true);
                 } else if (nyDurum == 1) { // flagged
-                    // Always show emoji fallback — image may still be loading in background
-                    ImageView bayrakView = cachedView(imgBayrak);
-                    if (bayrakView != null) {
-                        btn.setGraphic(bayrakView);
-                        btn.setText("");
-                    } else {
-                        btn.setGraphic(null);
-                        btn.setText(leblebModu ? "🚧" : "🚩");
-                    }
+                    Label flagL = new Label("🚩");
+                    flagL.setStyle("-fx-font-size:20px;");
+                    btn.setText("");
+                    btn.setGraphic(flagL);
                     btn.setStyle(isaretliHucreTarzi());
                     btn.setDisable(false);
                 } else if (nyDurum == 4) { // karga highlight
@@ -933,16 +957,17 @@ public class MinesweeperApp extends Application {
                     btn.setStyle(acilmamisHucreTarzi() +
                         "-fx-border-color: " + LB_KARGA_RENK + "; -fx-border-width: 3;");
                     btn.setDisable(false);
-                } else if (nyDurum == 5) { // yılan basılan hücre — 🐍 göster
-                    btn.setGraphic(null);
-                    btn.setText("🐍");
+                } else if (nyDurum == 5) { // yılan basılan hücre
+                    Label snakeL = new Label("🐍");
+                    snakeL.setStyle("-fx-font-size:20px;");
+                    btn.setText("");
+                    btn.setGraphic(snakeL);
                     btn.setStyle(
                         "-fx-background-color: #8B0000;" +
-                        "-fx-text-fill: #ffffff; -fx-font-weight: bold; -fx-font-size: 18px;" +
                         "-fx-border-color: #ff4444; -fx-border-width: 2;" +
                         "-fx-background-radius: 3; -fx-border-radius: 3; -fx-padding: 0;"
                     );
-                    btn.setDisable(true);
+                    btn.setDisable(false); // keep enabled so right-click (flag) still works
                 } else { // closed normal
                     btn.setGraphic(null);
                     btn.setText("");
@@ -1363,41 +1388,52 @@ public class MinesweeperApp extends Application {
         String fg   = leblebi ? "#f5e6b0" : "#cdd6f4";
         String hbg  = leblebi ? "#5c3a00" : "#181825";
 
+        // Set on the pane itself AND propagate with CSS so all child labels inherit
         pane.setStyle(
             "-fx-background-color: " + bg + ";" +
             "-fx-font-size: 14px;" +
             "-fx-text-fill: " + fg + ";"
         );
 
-        javafx.application.Platform.runLater(() -> {
-            javafx.scene.Node contentNode = pane.lookup(".content.label");
-            if (contentNode instanceof javafx.scene.control.Label lbl)
-                lbl.setStyle("-fx-text-fill: " + fg + "; -fx-font-size: 14px;");
+        // Apply immediately and also deferred (layout may not be complete yet)
+        Runnable stilUygula = () -> {
+            // Content label
+            for (javafx.scene.Node n : pane.lookupAll(".label")) {
+                if (n instanceof javafx.scene.control.Label lbl) {
+                    String mevcut = lbl.getStyle() == null ? "" : lbl.getStyle();
+                    // Don't override if already has explicit text-fill from caller
+                    if (!mevcut.contains("-fx-text-fill"))
+                        lbl.setStyle(mevcut + "-fx-text-fill:" + fg + ";-fx-font-size:14px;");
+                }
+            }
 
             javafx.scene.Node headerNode = pane.lookup(".header-panel");
             if (headerNode != null) {
-                headerNode.setStyle("-fx-background-color: " + hbg + ";");
+                headerNode.setStyle("-fx-background-color:" + hbg + ";");
                 javafx.scene.Node headerLabel = pane.lookup(".header-panel .label");
                 if (headerLabel instanceof javafx.scene.control.Label lbl)
-                    lbl.setStyle("-fx-text-fill: " + fg + "; -fx-font-size: 15px; -fx-font-weight: bold;");
+                    lbl.setStyle("-fx-text-fill:" + fg + ";-fx-font-size:15px;-fx-font-weight:bold;");
             }
 
             // TextField varsa (TextInputDialog)
             javafx.scene.Node tf = pane.lookup(".text-field");
             if (tf instanceof javafx.scene.control.TextField field)
-                field.setStyle("-fx-background-color: " + hbg + "; -fx-text-fill: " + fg + "; -fx-font-size: 13px;");
+                field.setStyle("-fx-background-color:" + hbg + ";-fx-text-fill:" + fg + ";-fx-font-size:13px;");
 
             // Butonları düzelt
             pane.getButtonTypes().forEach(bt -> {
                 javafx.scene.Node btn = pane.lookupButton(bt);
                 if (btn != null)
                     btn.setStyle(
-                        "-fx-background-color: " + (leblebi ? "#7a5200" : "#313244") + ";" +
-                        "-fx-text-fill: " + fg + ";" +
-                        "-fx-font-size: 13px; -fx-background-radius: 6; -fx-padding: 6 14 6 14;"
+                        "-fx-background-color:" + (leblebi ? "#7a5200" : "#313244") + ";" +
+                        "-fx-text-fill:" + fg + ";" +
+                        "-fx-font-size:13px;-fx-background-radius:6;-fx-padding:6 14 6 14;"
                     );
             });
-        });
+        };
+
+        stilUygula.run();
+        javafx.application.Platform.runLater(stilUygula);
     }
 
     // ── Global Font / CSS altyapısı ──────────────────────────────────────────
