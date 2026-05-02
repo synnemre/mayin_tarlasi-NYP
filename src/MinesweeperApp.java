@@ -237,6 +237,7 @@ public class MinesweeperApp extends Application {
         });
 
         Button skorBtn = menuButonOlustur("🏆  En İyi Tarımcılar", "#a6e3a1", "#1e1e2e");
+        skorBtn.setVisible(leblebAcildi);
         skorBtn.setOnAction(e -> {
             sesCal(sesButon);
             skorTablosunuGoster();
@@ -276,7 +277,7 @@ public class MinesweeperApp extends Application {
                 if (basiliKodBuffer.toString().equals(EASTER_EGG_KOD)) {
                     leblebAcildi = true;
                     basiliKodBuffer.setLength(0); // clear buffer — won't match again anyway
-                    easterEggTetikle(kok, leblebBtn, easterEggEtiketi);
+                    easterEggTetikle(kok, leblebBtn, skorBtn, easterEggEtiketi);
                 }
             }
         });
@@ -303,7 +304,7 @@ public class MinesweeperApp extends Application {
 
     // ── Easter Egg ────────────────────────────────────────────────────────────
 
-    private void easterEggTetikle(VBox kok, Button leblebBtn, Label etiket) {
+    private void easterEggTetikle(VBox kok, Button leblebBtn, Button skorBtn, Label etiket) {
         // Sarsıntı animasyonu
         TranslateTransition sarsinti = new TranslateTransition(Duration.millis(60), kok);
         sarsinti.setByX(12);
@@ -324,6 +325,8 @@ public class MinesweeperApp extends Application {
         // Butonu göster
         leblebBtn.setVisible(true);
         leblebBtn.setManaged(true);
+        skorBtn.setVisible(true);
+        skorBtn.setManaged(true);
 
         // Uyarı mesajı
         etiket.setText("🫘 Mehmet Emmi'nin Leblebi Tarlası Modu Açıldı!");
@@ -690,6 +693,7 @@ public class MinesweeperApp extends Application {
                 canEtiketi.setText("❤ x" + leblebiBoardMode.getCanSayisi());
                 // Yılan uyarı ekranı — sadece can varsa (oyun bitmemişse)
                 if (!leblebiBoardMode.isOyunBitti()) {
+                    zamanlayici.pause();
                     yilanUyarisiGoster(s, u);
                 }
             } else {
@@ -1000,7 +1004,8 @@ public class MinesweeperApp extends Application {
             "O hücre işaretlendi (Y)."
         );
         dialogStilUygula(uyari, true);
-        uyari.showAndWait();
+        Optional<ButtonType> result = uyari.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) zamanlayici.play();
     }
 
     private boolean popupGosterildi = false;
