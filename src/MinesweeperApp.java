@@ -56,7 +56,7 @@ public class MinesweeperApp extends Application {
 
     private static final String LB_ARKAPLAN     = "#3d2800";
     private static final String LB_ACILMAMIS    = "#c89a2a";
-    private static final String LB_ACILMIS      = "#f5e6b0";
+    private static final String LB_ACILMIS      = "#7a4e1a";
     private static final String LB_ISARETLI     = "#e8b84b";
     private static final String LB_SOLUCAN_RENK = "#4a7c2f";
     private static final String LB_CERCEVE      = "#a07020";
@@ -70,7 +70,7 @@ public class MinesweeperApp extends Application {
     private static final String[] AT_SAYI_RENK = {
         "", "#1565c0","#2e7d32","#c62828","#0277bd","#e65100","#00838f","#6a1b9a","#37474f"};
     private static final String[] LB_SAYI_RENK = {
-        "", "#5a3e00","#2e7d32","#b22222","#1a5276","#7d3c00","#1a6b4a","#5b2c6f","#3d2800"};
+        "", "#e8c27a","#6dbe45","#d95f3b","#5ba3d6","#d4a050","#40d4b0","#c080e0","#f0c060"};
 
     // ── Uygulama durumu ───────────────────────────────────────────────────────
     private Stage pencere;
@@ -282,6 +282,7 @@ public class MinesweeperApp extends Application {
             }
         });
 
+        globalCssUygula(menuSahne);
         pencere.setScene(menuSahne);
     }
 
@@ -405,6 +406,7 @@ public class MinesweeperApp extends Application {
         sahne = new Scene(kokDuzen, genislik, yukseklik);
         sahne.widthProperty().addListener((g, e, y) -> hucreBoyutlariniGuncelle());
         sahne.heightProperty().addListener((g, e, y) -> hucreBoyutlariniGuncelle());
+        globalCssUygula(sahne);
 
         pencere.setScene(sahne);
         hucreBoyutlariniGuncelle();
@@ -413,23 +415,29 @@ public class MinesweeperApp extends Application {
     // ── Üst Bar ───────────────────────────────────────────────────────────────
 
     private void ustBariOlustur() {
+        // HUD etiketleri — büyük, tok, dikkat çekici
+        String hudLabelStil  = "-fx-font-size: 19px; -fx-font-weight: bold; -fx-padding: 4 12 4 12;" +
+                               "-fx-background-radius: 8;";
+        String hudPuanStil   = "-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #f0c040;" +
+                               "-fx-padding: 4 12 4 12; -fx-background-radius: 8;";
+
         maynSayaciEtiketi = new Label();
-        maynSayaciEtiketi.setStyle("-fx-font-size: 15px; -fx-font-weight: bold;");
+        maynSayaciEtiketi.setStyle(hudLabelStil);
 
         zamanlayiciEtiketi = new Label();
-        zamanlayiciEtiketi.setStyle("-fx-font-size: 15px; -fx-font-weight: bold;");
+        zamanlayiciEtiketi.setStyle(hudLabelStil);
 
         canEtiketi = new Label("");
-        canEtiketi.setStyle("-fx-font-size: 15px; -fx-font-weight: bold;");
+        canEtiketi.setStyle(hudLabelStil + "-fx-text-fill: #ff6b6b;");
 
         puanEtiketi = new Label("");
-        puanEtiketi.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #c89a2a;");
+        puanEtiketi.setStyle(hudPuanStil);
 
         durumEtiketi = new Label("");
-        durumEtiketi.setStyle("-fx-font-size: 13px; -fx-font-weight: bold;");
+        durumEtiketi.setStyle("-fx-font-size: 15px; -fx-font-weight: bold;");
 
         sifirlaBtn = new Button(leblebModu ? "🌾" : "😊");
-        sifirlaBtn.setStyle(butonTarzi());
+        sifirlaBtn.setStyle(butonTarzi() + "-fx-font-size: 18px; -fx-padding: 6 14 6 14;");
         sifirlaBtn.setOnAction(o -> {
             sesCal(sesButon);
             oyunuSifirla();
@@ -445,6 +453,8 @@ public class MinesweeperApp extends Application {
 
         Button temaBtn = new Button(karanlikTema ? "☀" : "★");
         temaBtn.setStyle(butonTarzi());
+        temaBtn.setVisible(!leblebModu);   // Leblebi modunda tema tuşu gizli
+        temaBtn.setManaged(!leblebModu);
         temaBtn.setOnAction(o -> {
             karanlikTema = !karanlikTema;
             temaBtn.setText(karanlikTema ? "☀" : "★");
@@ -458,7 +468,7 @@ public class MinesweeperApp extends Application {
             zamanlayiciEtiketi, puanEtiketi, durumEtiketi, temaBtn
         );
         ustBar.setAlignment(Pos.CENTER_LEFT);
-        ustBar.setPadding(new Insets(0, 0, 10, 0));
+        ustBar.setPadding(new Insets(6, 8, 10, 8));
         kokDuzen.setTop(ustBar);
 
         // Etiket içeriklerini ilk değerle doldur
@@ -517,6 +527,21 @@ public class MinesweeperApp extends Application {
                     if (marketPanel != null) marketPanelGuncelle();
                 });
 
+                btn.setOnMouseEntered(olay -> {
+                    if (!btn.isDisabled() && !oyunAktifDegil()) {
+                        Cell hh = tahta.getHucre(sr, su);
+                        if (!hh.isAcildiMi() && !hh.isIsaretlendi())
+                            btn.setStyle(acilmamisHucreHoverTarzi());
+                    }
+                });
+                btn.setOnMouseExited(olay -> {
+                    if (!btn.isDisabled()) {
+                        Cell hh = tahta.getHucre(sr, su);
+                        if (!hh.isAcildiMi() && !hh.isIsaretlendi())
+                            btn.setStyle(acilmamisHucreTarzi());
+                    }
+                });
+
                 dugmeler[s][u] = btn;
                 izgaraDuzen.add(btn, u, s);
             }
@@ -533,29 +558,31 @@ public class MinesweeperApp extends Application {
     private void marketPanelOlustur() {
         Seviye seviye = Seviye.getSeviye(mevcutSeviye);
 
-        marketPanel = new VBox(12);
-        marketPanel.setPadding(new Insets(12));
-        marketPanel.setPrefWidth(190);
+        marketPanel = new VBox(10);
+        marketPanel.setPadding(new Insets(14));
+        marketPanel.setPrefWidth(200);
         marketPanel.setStyle(
-            "-fx-background-color: #5c3a00; -fx-background-radius: 10;" +
-            "-fx-border-color: #a07020; -fx-border-width: 1.5; -fx-border-radius: 10;"
+            "-fx-background-color: #4a2e00; -fx-background-radius: 14;" +
+            "-fx-border-color: #c89a2a; -fx-border-width: 2; -fx-border-radius: 14;" +
+            "-fx-effect: dropshadow(gaussian,rgba(0,0,0,0.5),12,0,0,4);"
         );
 
-        Label baslik = new Label("🛒 Market");
-        baslik.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #f5e6b0;");
+        Label baslik = new Label("🛒  Market");
+        baslik.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #f5e6b0;" +
+                        "-fx-padding: 0 0 4 0;");
 
         Label seviyeEtiketi = new Label("Seviye " + mevcutSeviye + ": " + seviye.isim);
         seviyeEtiketi.setStyle("-fx-font-size: 11px; -fx-text-fill: #c89a2a;");
         seviyeEtiketi.setWrapText(true);
 
         Separator sep = new Separator();
-        sep.setStyle("-fx-background-color: #a07020;");
+        sep.setStyle("-fx-background-color: #c89a2a; -fx-opacity: 0.5;");
 
-        // Market ürünleri
-        Button kargaBtn  = marketButonOlustur("🐦 Karga",       "Rastgele yılan göster",  "15 puan");
-        Button saatBtn   = marketButonOlustur("⌚ Emmi'nin Saati","+ 30 saniye",              "20 puan");
-        Button ilacBtn   = marketButonOlustur("🧪 Zirai İlaç",  "3x3 güvenli açar",          "30 puan");
-        Button kalpBtn   = marketButonOlustur("💖 Ekstra Kalp", "+1 can",                    "50 puan");
+        // Modern kart butonları — ikon büyük, altında puan
+        Button kargaBtn  = marketKartButonOlustur("🐦", "Karga",        "15 🫘");
+        Button saatBtn   = marketKartButonOlustur("⏰", "Emmi'nin Saati","20 🫘");
+        Button ilacBtn   = marketKartButonOlustur("🧪", "Zirai İlaç",   "30 🫘");
+        Button kalpBtn   = marketKartButonOlustur("❤️", "Ekstra Kalp",  "50 🫘");
 
         kargaBtn.setId("kargaBtn");
         saatBtn.setId("saatBtn");
@@ -616,29 +643,66 @@ public class MinesweeperApp extends Application {
             }
         });
 
-        marketPanel.getChildren().addAll(baslik, seviyeEtiketi, sep, kargaBtn, saatBtn, ilacBtn, kalpBtn);
+        // 2x2 grid yerleşimi
+        GridPane kartlar = new GridPane();
+        kartlar.setHgap(8);
+        kartlar.setVgap(8);
+        kartlar.add(kargaBtn, 0, 0);
+        kartlar.add(saatBtn,  1, 0);
+        kartlar.add(ilacBtn,  0, 1);
+        kartlar.add(kalpBtn,  1, 1);
+        GridPane.setHgrow(kargaBtn, Priority.ALWAYS);
+        GridPane.setHgrow(saatBtn,  Priority.ALWAYS);
+        GridPane.setHgrow(ilacBtn,  Priority.ALWAYS);
+        GridPane.setHgrow(kalpBtn,  Priority.ALWAYS);
+
+        marketPanel.getChildren().addAll(baslik, seviyeEtiketi, sep, kartlar);
     }
 
-    private Button marketButonOlustur(String isim, String aciklama, String fiyat) {
-        String metin = isim + "\n" + aciklama + "\n(" + fiyat + ")";
-        Button btn = new Button(metin);
+    private static final String MKT_BTN_NORMAL =
+        "-fx-background-color: #6b3e00; -fx-text-fill: #f5e6b0;" +
+        "-fx-background-radius: 10; -fx-border-radius: 10;" +
+        "-fx-border-color: #a07020; -fx-border-width: 1.5;" +
+        "-fx-cursor: hand; -fx-alignment: center;";
+    private static final String MKT_BTN_HOVER =
+        "-fx-background-color: #8a5500; -fx-text-fill: #fff8e0;" +
+        "-fx-background-radius: 10; -fx-border-radius: 10;" +
+        "-fx-border-color: #f0c040; -fx-border-width: 2;" +
+        "-fx-cursor: hand; -fx-alignment: center;" +
+        "-fx-effect: dropshadow(gaussian,#f0c040,8,0.4,0,0);";
+
+    private Button marketKartButonOlustur(String ikon, String isim, String fiyat) {
+        Label ikonLabel = new Label(ikon);
+        ikonLabel.setStyle("-fx-font-size: 28px;");
+
+        Label isimLabel = new Label(isim);
+        isimLabel.setStyle("-fx-font-size: 10px; -fx-text-fill: #d4b070; -fx-font-weight: bold;");
+        isimLabel.setWrapText(true);
+        isimLabel.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
+
+        Label fiyatLabel = new Label(fiyat);
+        fiyatLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #f0c040; -fx-font-weight: bold;");
+
+        VBox kutu = new VBox(2, ikonLabel, isimLabel, fiyatLabel);
+        kutu.setAlignment(Pos.CENTER);
+        kutu.setMaxWidth(Double.MAX_VALUE);
+
+        Button btn = new Button();
+        btn.setGraphic(kutu);
         btn.setMaxWidth(Double.MAX_VALUE);
-        btn.setAlignment(Pos.CENTER_LEFT);
-        btn.setStyle(
-            "-fx-background-color: #7a5200; -fx-text-fill: #f5e6b0;" +
-            "-fx-font-size: 12px; -fx-padding: 8 10 8 10;" +
-            "-fx-background-radius: 8; -fx-cursor: hand;" +
-            "-fx-border-color: #a07020; -fx-border-width: 1; -fx-border-radius: 8;"
-        );
-        btn.setOnMouseEntered(e -> btn.setOpacity(0.8));
-        btn.setOnMouseExited(e -> btn.setOpacity(1.0));
+        btn.setPrefHeight(90);
+        btn.setStyle(MKT_BTN_NORMAL);
+        btn.setOnMouseEntered(e -> { if (!btn.isDisabled()) btn.setStyle(MKT_BTN_HOVER); });
+        btn.setOnMouseExited(e -> btn.setStyle(MKT_BTN_NORMAL));
         return btn;
     }
 
     private void marketPanelGuncelle() {
         if (marketPanel == null || leblebiBoardMode == null) return;
         int puan = leblebiBoardMode.getLeblebPuani();
-        marketPanel.getChildren().forEach(dugum -> {
+
+        // Hem direkt children hem de GridPane içindeki butonlara ulaş
+        java.util.function.Consumer<javafx.scene.Node> guncelleBtn = dugum -> {
             if (dugum instanceof Button btn) {
                 String id = btn.getId();
                 if (id == null) return;
@@ -651,6 +715,15 @@ public class MinesweeperApp extends Application {
                 };
                 btn.setDisable(!aktif);
                 btn.setOpacity(aktif ? 1.0 : 0.5);
+                if (aktif) btn.setStyle(MKT_BTN_NORMAL);
+            }
+        };
+
+        marketPanel.getChildren().forEach(dugum -> {
+            guncelleBtn.accept(dugum);
+            // GridPane içindeki butonları da kontrol et
+            if (dugum instanceof GridPane gp) {
+                gp.getChildren().forEach(guncelleBtn::accept);
             }
         });
     }
@@ -832,8 +905,8 @@ public class MinesweeperApp extends Application {
                 Button btn = dugmeler[s][u];
 
                 if (nyDurum == 3) { // opened mine (oyun bitti, tüm mayınlar açıldı)
-                    btn.setText(leblebModu ? "🐍" : "X");
-                    btn.setGraphic(leblebModu ? null : cachedView(imgMayin));
+                    btn.setText(leblebModu ? "🐍" : "💣");
+                    btn.setGraphic(null); // her zaman emoji kullan — daha tutarlı
                     btn.setStyle(mayinHucreTarzi());
                     btn.setDisable(true);
                 } else if (nyDurum >= 10) { // opened safe (10 + neighbourCount)
@@ -850,7 +923,7 @@ public class MinesweeperApp extends Application {
                         btn.setText("");
                     } else {
                         btn.setGraphic(null);
-                        btn.setText(leblebModu ? "⚑" : "🚩");
+                        btn.setText(leblebModu ? "🚧" : "🚩");
                     }
                     btn.setStyle(isaretliHucreTarzi());
                     btn.setDisable(false);
@@ -860,12 +933,12 @@ public class MinesweeperApp extends Application {
                     btn.setStyle(acilmamisHucreTarzi() +
                         "-fx-border-color: " + LB_KARGA_RENK + "; -fx-border-width: 3;");
                     btn.setDisable(false);
-                } else if (nyDurum == 5) { // yılan basılan hücre — Y göster
+                } else if (nyDurum == 5) { // yılan basılan hücre — 🐍 göster
                     btn.setGraphic(null);
-                    btn.setText("Y");
+                    btn.setText("🐍");
                     btn.setStyle(
                         "-fx-background-color: #8B0000;" +
-                        "-fx-text-fill: #ffffff; -fx-font-weight: bold; -fx-font-size: 14px;" +
+                        "-fx-text-fill: #ffffff; -fx-font-weight: bold; -fx-font-size: 18px;" +
                         "-fx-border-color: #ff4444; -fx-border-width: 2;" +
                         "-fx-background-radius: 3; -fx-border-radius: 3; -fx-padding: 0;"
                     );
@@ -1001,7 +1074,7 @@ public class MinesweeperApp extends Application {
         uyari.setContentText(
             "Dikkatli ol! Yılan seni ısırdı.\n" +
             "Canın gitti! ❤ x" + leblebiBoardMode.getCanSayisi() + " kaldı.\n\n" +
-            "O hücre işaretlendi (Y)."
+            "O hücre işaretlendi (🐍)."
         );
         dialogStilUygula(uyari, true);
         Optional<ButtonType> result = uyari.showAndWait();
@@ -1046,7 +1119,7 @@ public class MinesweeperApp extends Application {
 
     private void skorTablosunuGoster() {
         Stage skorPenceresi = new Stage();
-        skorPenceresi.setTitle("🏆 En İyi Tarımcılar");
+        skorPenceresi.setTitle("En Iyi Tarimcilar");
         skorPenceresi.initModality(Modality.APPLICATION_MODAL);
 
         VBox kok = new VBox(16);
@@ -1107,12 +1180,18 @@ public class MinesweeperApp extends Application {
         kapat.setOnAction(e -> skorPenceresi.close());
 
         ScrollPane scroll = new ScrollPane(tablo);
-        scroll.setStyle("-fx-background-color: transparent;");
+        scroll.setStyle("-fx-background-color: #1e1e2e; -fx-background: #1e1e2e;");
         scroll.setFitToWidth(true);
+        // Viewport arka planını da boyalı yap — beyaz pixel sorununu önler
+        scroll.viewportBoundsProperty().addListener((obs, ov, nv) -> {
+            javafx.scene.Node vp = scroll.lookup(".viewport");
+            if (vp != null) vp.setStyle("-fx-background-color: #1e1e2e;");
+        });
 
         kok.getChildren().addAll(baslik, scroll, kapat);
 
         Scene sahne2 = new Scene(kok, 560, 480);
+        sahne2.setFill(javafx.scene.paint.Color.web("#1e1e2e"));
         skorPenceresi.setScene(sahne2);
         skorPenceresi.showAndWait();
     }
@@ -1149,8 +1228,30 @@ public class MinesweeperApp extends Application {
     // ── Hücre Stilleri ───────────────────────────────────────────────────────
 
     private String acilmamisHucreTarzi() {
-        String bg = leblebModu ? LB_ACILMAMIS : (karanlikTema ? KT_ACILMAMIS : AT_ACILMAMIS);
-        String br = leblebModu ? LB_CERCEVE   : (karanlikTema ? KT_CERCEVE   : AT_CERCEVE);
+        if (leblebModu) {
+            // 3D raised button: light top/left, dark bottom/right
+            return "-fx-background-color:" + LB_ACILMAMIS + ";" +
+                   "-fx-border-color: #e8c55a #7a5500 #7a5500 #e8c55a;" +
+                   "-fx-border-width:2;-fx-background-radius:3;-fx-border-radius:3;" +
+                   "-fx-padding:0;-fx-cursor:hand;";
+        }
+        String bg = karanlikTema ? KT_ACILMAMIS : AT_ACILMAMIS;
+        String br = karanlikTema ? KT_CERCEVE   : AT_CERCEVE;
+        return "-fx-background-color:" + bg + ";" +
+               "-fx-border-color:" + br + ";" +
+               "-fx-border-width:1;-fx-background-radius:3;-fx-border-radius:3;" +
+               "-fx-padding:0;-fx-cursor:hand;";
+    }
+
+    private String acilmamisHucreHoverTarzi() {
+        if (leblebModu) {
+            return "-fx-background-color:#d9aa3a;" +
+                   "-fx-border-color: #f0d070 #8a6510 #8a6510 #f0d070;" +
+                   "-fx-border-width:2;-fx-background-radius:3;-fx-border-radius:3;" +
+                   "-fx-padding:0;-fx-cursor:hand;";
+        }
+        String bg = karanlikTema ? "#5a5770" : "#d0d8e8";
+        String br = karanlikTema ? KT_CERCEVE : AT_CERCEVE;
         return "-fx-background-color:" + bg + ";" +
                "-fx-border-color:" + br + ";" +
                "-fx-border-width:1;-fx-background-radius:3;-fx-border-radius:3;" +
@@ -1160,10 +1261,17 @@ public class MinesweeperApp extends Application {
     private String acilmisHucreTarzi(int k, String[] sr) { return acilmisHucreTarzi(k, sr, 14); }
 
     private String acilmisHucreTarzi(int k, String[] sr, double yaz) {
-        String bg = leblebModu ? LB_ACILMIS   : (karanlikTema ? KT_ACILMIS   : AT_ACILMIS);
-        String br = leblebModu ? LB_CERCEVE   : (karanlikTema ? KT_CERCEVE   : AT_CERCEVE);
-        String fg = (k > 0 && k <= 8) ? sr[k]
-                  : (leblebModu ? LB_YAZI_SOLUK : (karanlikTema ? KT_YAZI_SOLUK : AT_YAZI_SOLUK));
+        String bg, br, fgSoluk;
+        if (leblebModu) {
+            bg = LB_ACILMIS;      // kazılmış toprak koyu kahve
+            br = "#5c3200";       // daha koyu çerçeve
+            fgSoluk = "#c8a060";  // boş hücre için soluk krem
+        } else {
+            bg = karanlikTema ? KT_ACILMIS : AT_ACILMIS;
+            br = karanlikTema ? KT_CERCEVE : AT_CERCEVE;
+            fgSoluk = karanlikTema ? KT_YAZI_SOLUK : AT_YAZI_SOLUK;
+        }
+        String fg = (k > 0 && k <= 8) ? sr[k] : fgSoluk;
         return "-fx-background-color:" + bg + ";" +
                "-fx-border-color:" + br + ";-fx-border-width:1;" +
                "-fx-background-radius:3;-fx-border-radius:3;-fx-padding:0;" +
@@ -1181,11 +1289,12 @@ public class MinesweeperApp extends Application {
     }
 
     private String mayinHucreTarzi() {
-        String bg = leblebModu ? LB_SOLUCAN_RENK : (karanlikTema ? KT_MAYIN : AT_MAYIN);
-        String fg = leblebModu ? "#f5e6b0"        : (karanlikTema ? "#1e1e2e" : "#ffffff");
+        // Klasik modda da koyu kırmızı, bomba emojisi
+        String bg = leblebModu ? LB_SOLUCAN_RENK : "#8B0000";
+        String fg = "#ffffff";
         return "-fx-background-color:" + bg + ";-fx-border-width:1;" +
                "-fx-background-radius:3;-fx-border-radius:3;-fx-padding:0;" +
-               "-fx-text-fill:" + fg + ";-fx-font-weight:bold;-fx-font-size:14px;";
+               "-fx-text-fill:" + fg + ";-fx-font-weight:bold;-fx-font-size:16px;";
     }
 
     // ── Tema ─────────────────────────────────────────────────────────────────
@@ -1208,7 +1317,8 @@ public class MinesweeperApp extends Application {
         if (kokDuzen.getTop() instanceof HBox bar) {
             bar.setStyle(
                 "-fx-background-color:" + ustBr + ";" +
-                "-fx-background-radius:8;-fx-padding:8 12 8 12;"
+                "-fx-background-radius:10;-fx-padding:10 16 10 16;" +
+                "-fx-effect: dropshadow(gaussian,rgba(0,0,0,0.35),8,0,0,3);"
             );
             bar.getChildren().forEach(n -> {
                 if (n instanceof Label l)
@@ -1288,6 +1398,50 @@ public class MinesweeperApp extends Application {
                     );
             });
         });
+    }
+
+    // ── Global Font / CSS altyapısı ──────────────────────────────────────────
+    /**
+     * Projeye özel font yükler ve tüm sahneye uygular.
+     *
+     * KULLANIM:
+     *   1. "assets/fonts/" klasörüne .ttf dosyanızı koyun (örn. PressStart2P-Regular.ttf).
+     *   2. Aşağıdaki FONT_YOL sabitini dosya adıyla güncelleyin.
+     *   3. Derleme ve çalıştırma — tüm Label, Button ve Input alanları bu fontu kullanır.
+     *
+     * Font bulunamazsa JavaFX'in varsayılan sistemi fontu devreye girer (sessiz fallback).
+     */
+    private static final String FONT_YOL = "assets/fonts/GameFont.ttf";
+
+    private void globalCssUygula(Scene hedefSahne) {
+        // 1. Font yüklemeyi dene
+        boolean fontYuklendi = false;
+        try {
+            java.net.URL fontUrl = getClass().getResource(FONT_YOL);
+            if (fontUrl == null) fontUrl = new java.io.File(FONT_YOL).toURI().toURL();
+            javafx.scene.text.Font yuklenenFont = javafx.scene.text.Font.loadFont(
+                fontUrl.toExternalForm(), 14);
+            fontYuklendi = (yuklenenFont != null);
+        } catch (Exception ignored) { /* Font dosyası yoksa sessizce atla */ }
+
+        // 2. CSS string oluştur
+        String fontFamily = fontYuklendi ? "GameFont" : "System";
+        String css =
+            ".root { -fx-font-family: '" + fontFamily + "'; }" +
+            ".label { -fx-font-family: '" + fontFamily + "'; }" +
+            ".button { -fx-font-family: '" + fontFamily + "'; }" +
+            ".text-field { -fx-font-family: '" + fontFamily + "'; }" +
+            ".text-area { -fx-font-family: '" + fontFamily + "'; }" +
+            ".dialog-pane .label { -fx-font-family: '" + fontFamily + "'; }" +
+            ".dialog-pane .button { -fx-font-family: '" + fontFamily + "'; }";
+
+        // 3. Sahneye uygula (data URI yöntemi — dış dosya gerektirmez)
+        String encoded = java.util.Base64.getEncoder()
+            .encodeToString(css.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        String dataUri = "data:text/css;base64," + encoded;
+
+        hedefSahne.getStylesheets().clear();
+        hedefSahne.getStylesheets().add(dataUri);
     }
 
     public static void main(String[] args) { launch(); }
