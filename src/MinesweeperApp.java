@@ -94,6 +94,9 @@ public class MinesweeperApp extends Application {
     // State encoding: 0=closed, 1=flagged, 2=opened-safe, 3=opened-mine, 4=karga-highlight
     private byte[][] hucreDurum;
 
+    // Yılan basılan hücreler (Y harfi gösterilecek)
+    private java.util.Set<Integer> yilanHucreleri = new java.util.HashSet<>();
+
     // UI Bileşenleri
     private Label maynSayaciEtiketi;
     private Label zamanlayiciEtiketi;
@@ -223,9 +226,8 @@ public class MinesweeperApp extends Application {
             "-fx-font-size: 36px; -fx-font-weight: bold;" +
             "-fx-text-fill: #cdd6f4; -fx-effect: dropshadow(gaussian,#89b4fa,12,0.4,0,0);"
         );
-
-        Label altBaslik = new Label("Mehmet Emmi'nin Çiftliğine Hoşgeldin");
-        altBaslik.setStyle("-fx-font-size: 14px; -fx-text-fill: #6c7086;");
+        baslik.setMaxWidth(Double.MAX_VALUE);
+        baslik.setAlignment(javafx.geometry.Pos.CENTER);
 
         Button klasikBtn = menuButonOlustur("⛏  Klasik Mayın Tarlası Oyna", "#89b4fa", "#1e1e2e");
         klasikBtn.setOnAction(e -> {
@@ -258,7 +260,7 @@ public class MinesweeperApp extends Application {
         easterEggEtiketi.setId("easterEggEtiket");
         easterEggEtiketi.setStyle("-fx-font-size: 13px; -fx-text-fill: #c89a2a; -fx-font-weight: bold;");
 
-        kok.getChildren().addAll(baslik, altBaslik, klasikBtn, skorBtn, leblebBtn, easterEggEtiketi);
+        kok.getChildren().addAll(baslik, klasikBtn, skorBtn, leblebBtn, easterEggEtiketi);
 
         menuSahne = new Scene(kok, 600, 500);
 
@@ -333,9 +335,10 @@ public class MinesweeperApp extends Application {
         uyari.setContentText(
             "Mehmet Emmi çok mutlu!\n\n" +
             "Leblebi Tarlası modunu keşfettin.\n" +
-            "Solucanları temizle, leblebi kazan, marketten güç al!"
+            "Yılanları temizle, leblebi kazan, marketten güç al!"
         );
         uyari.getDialogPane().setStyle("-fx-background-color: #3d2800; -fx-font-size: 13px;");
+        dialogStilUygula(uyari, true);
         uyari.showAndWait();
     }
 
@@ -358,6 +361,7 @@ public class MinesweeperApp extends Application {
     // =========================================================================
 
     private void leblebOyunuBaslat() {
+        yilanHucreleri.clear();
         Seviye seviye = Seviye.getSeviye(mevcutSeviye);
         satirSayisi  = seviye.satirSayisi;
         sutunSayisi  = seviye.sutunSayisi;
@@ -545,7 +549,7 @@ public class MinesweeperApp extends Application {
         sep.setStyle("-fx-background-color: #a07020;");
 
         // Market ürünleri
-        Button kargaBtn  = marketButonOlustur("🐦 Karga",       "Rastgele solucan göster",  "15 puan");
+        Button kargaBtn  = marketButonOlustur("🐦 Karga",       "Rastgele yılan göster",  "15 puan");
         Button saatBtn   = marketButonOlustur("⌚ Emmi'nin Saati","+ 30 saniye",              "20 puan");
         Button ilacBtn   = marketButonOlustur("🧪 Zirai İlaç",  "3x3 güvenli açar",          "30 puan");
         Button kalpBtn   = marketButonOlustur("💖 Ekstra Kalp", "+1 can",                    "50 puan");
@@ -559,7 +563,7 @@ public class MinesweeperApp extends Application {
             if (leblebiBoardMode == null || oyunAktifDegil()) return;
             int[] konum = leblebiBoardMode.kargaKullan();
             if (konum == null) {
-                bilgilendirmeGoster("Karga", "Yetersiz puan veya solucan bulunamadı!");
+                bilgilendirmeGoster("Karga", "Yetersiz puan veya yılan bulunamadı!");
             } else {
                 sesCal(sesMarket);
                 arayuzuGuncelle();
@@ -684,6 +688,10 @@ public class MinesweeperApp extends Application {
             if (mineHit) {
                 sesCal(sesPatlama);
                 canEtiketi.setText("❤ x" + leblebiBoardMode.getCanSayisi());
+                // Yılan uyarı ekranı — sadece can varsa (oyun bitmemişse)
+                if (!leblebiBoardMode.isOyunBitti()) {
+                    yilanUyarisiGoster(s, u);
+                }
             } else {
                 sesCal(sesKazma);
                 int kazanilan = acikHucreSay() - oncekiAcik;
@@ -753,6 +761,7 @@ public class MinesweeperApp extends Application {
     private void oyunuSifirla() {
         if (zamanlayici != null) zamanlayici.stop();
         yerlestirilenIsaret = 0;
+        yilanHucreleri.clear();
         durumEtiketi.setText("");
         zamanlayiciEtiketi.setStyle("-fx-font-size: 15px; -fx-font-weight: bold;");
 
@@ -803,22 +812,24 @@ public class MinesweeperApp extends Application {
 
                 // Encode state into a byte that captures every visually distinct condition.
                 // open-safe: 10 + neighbourCount (10–18), open-mine: 3, flagged: 1,
-                // karga: 4, closed: 0.  Values never collide.
+                // karga: 4, yilan-Y: 5, closed: 0.  Values never collide.
+                boolean yilanY = leblebModu && yilanHucreleri.contains(s * sutunSayisi + u);
                 byte nyDurum;
-                if      (hucre.isAcildiMi() && hucre.isMayinMi()) nyDurum = 3;
-                else if (hucre.isAcildiMi())                       nyDurum = (byte)(10 + hucre.getKomsuMayinSayisi());
-                else if (hucre.isIsaretlendi())                    nyDurum = 1;
-                else if (kargaHedef)                               nyDurum = 4;
-                else                                               nyDurum = 0;
+                if      (yilanY)                                       nyDurum = 5;
+                else if (hucre.isAcildiMi() && hucre.isMayinMi())     nyDurum = 3;
+                else if (hucre.isAcildiMi())                           nyDurum = (byte)(10 + hucre.getKomsuMayinSayisi());
+                else if (hucre.isIsaretlendi())                        nyDurum = 1;
+                else if (kargaHedef)                                   nyDurum = 4;
+                else                                                   nyDurum = 0;
 
                 if (nyDurum == hucreDurum[s][u]) continue; // nothing changed — skip
                 hucreDurum[s][u] = nyDurum;
 
                 Button btn = dugmeler[s][u];
 
-                if (nyDurum == 3) { // opened mine
-                    btn.setText(leblebModu ? "S" : "X");
-                    btn.setGraphic(leblebModu ? cachedView(imgSolucan) : cachedView(imgMayin));
+                if (nyDurum == 3) { // opened mine (oyun bitti, tüm mayınlar açıldı)
+                    btn.setText(leblebModu ? "🐍" : "X");
+                    btn.setGraphic(leblebModu ? null : cachedView(imgMayin));
                     btn.setStyle(mayinHucreTarzi());
                     btn.setDisable(true);
                 } else if (nyDurum >= 10) { // opened safe (10 + neighbourCount)
@@ -845,6 +856,16 @@ public class MinesweeperApp extends Application {
                     btn.setStyle(acilmamisHucreTarzi() +
                         "-fx-border-color: " + LB_KARGA_RENK + "; -fx-border-width: 3;");
                     btn.setDisable(false);
+                } else if (nyDurum == 5) { // yılan basılan hücre — Y göster
+                    btn.setGraphic(null);
+                    btn.setText("Y");
+                    btn.setStyle(
+                        "-fx-background-color: #8B0000;" +
+                        "-fx-text-fill: #ffffff; -fx-font-weight: bold; -fx-font-size: 14px;" +
+                        "-fx-border-color: #ff4444; -fx-border-width: 2;" +
+                        "-fx-background-radius: 3; -fx-border-radius: 3; -fx-padding: 0;"
+                    );
+                    btn.setDisable(true);
                 } else { // closed normal
                     btn.setGraphic(null);
                     btn.setText("");
@@ -865,7 +886,7 @@ public class MinesweeperApp extends Application {
                 zamanlayici.stop();
                 sesCal(sesKazan);
                 sifirlaBtn.setText("🎉");
-                durumEtiketi.setText("🫘 Tüm solucanlar bulundu!");
+                durumEtiketi.setText("🫘 Tüm yılanlar bulundu!");
                 durumEtiketi.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #c89a2a;");
                 toplamLeblebPuani += leblebiBoardMode.getLeblebPuani();
                 // Seviye geçiş ekranı geciktirme
@@ -876,7 +897,7 @@ public class MinesweeperApp extends Application {
                 sifirlaBtn.setText("🪱");
                 boolean sureBitti = leblebiBoardMode.getKalanSure() <= 0;
                 String msg = sureBitti ? "⏰ Süre doldu! Mehmet Emmi üzüldü..."
-                                       : "💀 Canların bitti! Solucanlar kazandı!";
+                                       : "💀 Canların bitti! Yılanlar kazandı!";
                 durumEtiketi.setText(msg);
                 durumEtiketi.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #e74c3c;");
                 javafx.application.Platform.runLater(this::oyunSonuPopupuGoster);
@@ -946,6 +967,7 @@ public class MinesweeperApp extends Application {
         dialog.setContentText(icerik);
         dialog.getDialogPane().setStyle(
             "-fx-background-color: #3d2800; -fx-font-size: 13px; -fx-text-fill: #f5e6b0;");
+        dialogStilUygula(dialog, true);
 
         dialog.showAndWait().ifPresent(cevap -> {
             if (cevap.getButtonData() == ButtonBar.ButtonData.OK_DONE) {
@@ -962,6 +984,24 @@ public class MinesweeperApp extends Application {
     }
 
     // ── Oyun Sonu Popup ───────────────────────────────────────────────────────
+
+    // ── Yılan Uyarı Ekranı ────────────────────────────────────────────────────
+
+    private void yilanUyarisiGoster(int satir, int sutun) {
+        // O hücreyi Y olarak işaretle (görsel)
+        yilanHucreleri.add(satir * sutunSayisi + sutun);
+
+        Alert uyari = new Alert(Alert.AlertType.WARNING);
+        uyari.setTitle("Yılan!");
+        uyari.setHeaderText("🐍 Yılana Bastın!");
+        uyari.setContentText(
+            "Dikkatli ol! Yılan seni ısırdı.\n" +
+            "Canın gitti! ❤ x" + leblebiBoardMode.getCanSayisi() + " kaldı.\n\n" +
+            "O hücre işaretlendi (Y)."
+        );
+        dialogStilUygula(uyari, true);
+        uyari.showAndWait();
+    }
 
     private boolean popupGosterildi = false;
 
@@ -985,6 +1025,7 @@ public class MinesweeperApp extends Application {
             String.format("Skor: %d\nİsminizi girin:", finalSkor)
         );
         isimDialog.getDialogPane().setStyle("-fx-background-color: #1e1e2e; -fx-font-size: 13px;");
+        dialogStilUygula(isimDialog, false);
 
         isimDialog.showAndWait().ifPresent(isim -> {
             if (!isim.isBlank()) {
@@ -1037,12 +1078,15 @@ public class MinesweeperApp extends Application {
         } else {
             for (int i = 0; i < Math.min(liste.size(), 20); i++) {
                 SkorTablosu.SkorGirisi g = liste.get(i);
+                String isimGoster  = (g.isim()  == null || g.isim().isBlank())  ? "—" : g.isim();
+                String tarihGoster = (g.tarih() == null || g.tarih().isBlank()) ? "—" : g.tarih();
+                String seviyeGoster = g.seviye() <= 0 ? "Klasik" : "Seviye " + g.seviye();
                 String[] degerler = {
                     (i + 1) + ".",
-                    g.isim(),
+                    isimGoster,
                     String.valueOf(g.skor()),
-                    "Seviye " + g.seviye(),
-                    g.tarih()
+                    seviyeGoster,
+                    tarihGoster
                 };
                 String renk = i == 0 ? "#f1c40f" : i == 1 ? "#95a5a6" : i == 2 ? "#e67e22" : "#cdd6f4";
                 for (int j = 0; j < degerler.length; j++) {
@@ -1183,8 +1227,62 @@ public class MinesweeperApp extends Application {
         a.setTitle(baslik);
         a.setHeaderText(null);
         a.setContentText(mesaj);
-        a.getDialogPane().setStyle("-fx-background-color: #1e1e2e; -fx-font-size: 13px;");
+        dialogStilUygula(a, false);
         a.showAndWait();
+    }
+
+    /**
+     * Tüm Alert/Dialog pencerelerine okunabilir stil uygular.
+     * leblebi=true ise kahverengi tema, false ise koyu tema kullanılır.
+     */
+    private void dialogStilUygula(Alert alert, boolean leblebi) {
+        dialogStilUygulaTemel(alert.getDialogPane(), leblebi);
+    }
+
+    private void dialogStilUygula(TextInputDialog dialog, boolean leblebi) {
+        dialogStilUygulaTemel(dialog.getDialogPane(), leblebi);
+    }
+
+    private void dialogStilUygulaTemel(javafx.scene.control.DialogPane pane, boolean leblebi) {
+        String bg   = leblebi ? "#3d2800" : "#1e1e2e";
+        String fg   = leblebi ? "#f5e6b0" : "#cdd6f4";
+        String hbg  = leblebi ? "#5c3a00" : "#181825";
+
+        pane.setStyle(
+            "-fx-background-color: " + bg + ";" +
+            "-fx-font-size: 14px;" +
+            "-fx-text-fill: " + fg + ";"
+        );
+
+        javafx.application.Platform.runLater(() -> {
+            javafx.scene.Node contentNode = pane.lookup(".content.label");
+            if (contentNode instanceof javafx.scene.control.Label lbl)
+                lbl.setStyle("-fx-text-fill: " + fg + "; -fx-font-size: 14px;");
+
+            javafx.scene.Node headerNode = pane.lookup(".header-panel");
+            if (headerNode != null) {
+                headerNode.setStyle("-fx-background-color: " + hbg + ";");
+                javafx.scene.Node headerLabel = pane.lookup(".header-panel .label");
+                if (headerLabel instanceof javafx.scene.control.Label lbl)
+                    lbl.setStyle("-fx-text-fill: " + fg + "; -fx-font-size: 15px; -fx-font-weight: bold;");
+            }
+
+            // TextField varsa (TextInputDialog)
+            javafx.scene.Node tf = pane.lookup(".text-field");
+            if (tf instanceof javafx.scene.control.TextField field)
+                field.setStyle("-fx-background-color: " + hbg + "; -fx-text-fill: " + fg + "; -fx-font-size: 13px;");
+
+            // Butonları düzelt
+            pane.getButtonTypes().forEach(bt -> {
+                javafx.scene.Node btn = pane.lookupButton(bt);
+                if (btn != null)
+                    btn.setStyle(
+                        "-fx-background-color: " + (leblebi ? "#7a5200" : "#313244") + ";" +
+                        "-fx-text-fill: " + fg + ";" +
+                        "-fx-font-size: 13px; -fx-background-radius: 6; -fx-padding: 6 14 6 14;"
+                    );
+            });
+        });
     }
 
     public static void main(String[] args) { launch(); }
