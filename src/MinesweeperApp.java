@@ -3,6 +3,7 @@ import javafx.application.Application;
 import javafx.geometry.*;
 import javafx.scene.*;
 import javafx.scene.control.*;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.effect.*;
 import javafx.scene.image.*;
 import javafx.scene.input.*;
@@ -14,6 +15,7 @@ import javafx.stage.*;
 import javafx.util.Duration;
 
 import java.util.*;
+import java.util.Optional;
 
 /**
  * MinesweeperApp — Mayın Tarlası + Mehmet Emmi'nin Leblebi Tarlası
@@ -28,9 +30,6 @@ import java.util.*;
 public class MinesweeperApp extends Application {
 
     // ── Sabit boyut (klasik mod) ──────────────────────────────────────────────
-    private static final int KLASIK_SATIR  = 10;
-    private static final int KLASIK_SUTUN  = 10;
-    private static final int KLASIK_MAYIN  = 11;
     private static final int KLASIK_CAN    = 3;
 
     // ── Tema renkleri ─────────────────────────────────────────────────────────
@@ -38,7 +37,6 @@ public class MinesweeperApp extends Application {
     private static final String KT_ACILMAMIS = "#454158";
     private static final String KT_ACILMIS   = "#11111b";
     private static final String KT_ISARETLI  = "#524f6e";
-    private static final String KT_MAYIN     = "#f38ba8";
     private static final String KT_CERCEVE   = "#6c7086";
     private static final String KT_YAZI      = "#cdd6f4";
     private static final String KT_YAZI_SOLUK= "#6c7086";
@@ -48,7 +46,6 @@ public class MinesweeperApp extends Application {
     private static final String AT_ACILMAMIS = "#c0c8d8";
     private static final String AT_ACILMIS   = "#f4f4f4";
     private static final String AT_ISARETLI  = "#b0b8cc";
-    private static final String AT_MAYIN     = "#e57373";
     private static final String AT_CERCEVE   = "#9aa0b0";
     private static final String AT_YAZI      = "#1e1e2e";
     private static final String AT_YAZI_SOLUK= "#9aa0b0";
@@ -60,8 +57,6 @@ public class MinesweeperApp extends Application {
     private static final String LB_ISARETLI     = "#e8b84b";
     private static final String LB_SOLUCAN_RENK = "#4a7c2f";
     private static final String LB_CERCEVE      = "#a07020";
-    private static final String LB_YAZI         = "#3d2800";
-    private static final String LB_YAZI_SOLUK   = "#a07020";
     private static final String LB_UST_BAR      = "#5c3a00";
     private static final String LB_KARGA_RENK   = "#c0392b"; // Karga göstergesi
 
@@ -115,6 +110,11 @@ public class MinesweeperApp extends Application {
     private static final String EASTER_EGG_KOD = "1837837";
     private StringBuilder basiliKodBuffer = new StringBuilder();
     private boolean leblebAcildi = false; // persists across menu visits
+
+    // Klasik mod timer ayarları
+    private boolean klasikGeriSayim = false;   // true → countdown, false → count-up
+    private int     klasikSureSaniye = 0;      // >0 only when countdown is active
+    private int     klasikBaslangicSure = 0;   // saved so reset can restore it
 
     // Ses altyapısı
     private AudioClip sesKazma;
@@ -236,8 +236,7 @@ public class MinesweeperApp extends Application {
             klasikOyunuBaslat();
         });
 
-        Button skorBtn = menuButonOlustur("🏆  En İyi Tarımcılar", "#a6e3a1", "#1e1e2e");
-        skorBtn.setVisible(leblebAcildi);
+        Button skorBtn = menuButonOlustur("🏆  Skor Tablosu", "#a6e3a1", "#1e1e2e");
         skorBtn.setOnAction(e -> {
             sesCal(sesButon);
             skorTablosunuGoster();
@@ -277,7 +276,7 @@ public class MinesweeperApp extends Application {
                 if (basiliKodBuffer.toString().equals(EASTER_EGG_KOD)) {
                     leblebAcildi = true;
                     basiliKodBuffer.setLength(0); // clear buffer — won't match again anyway
-                    easterEggTetikle(kok, leblebBtn, skorBtn, easterEggEtiketi);
+                    easterEggTetikle(kok, leblebBtn, easterEggEtiketi);
                 }
             }
         });
@@ -305,7 +304,7 @@ public class MinesweeperApp extends Application {
 
     // ── Easter Egg ────────────────────────────────────────────────────────────
 
-    private void easterEggTetikle(VBox kok, Button leblebBtn, Button skorBtn, Label etiket) {
+    private void easterEggTetikle(VBox kok, Button leblebBtn, Label etiket) {
         // Sarsıntı animasyonu
         TranslateTransition sarsinti = new TranslateTransition(Duration.millis(60), kok);
         sarsinti.setByX(12);
@@ -326,8 +325,6 @@ public class MinesweeperApp extends Application {
         // Butonu göster
         leblebBtn.setVisible(true);
         leblebBtn.setManaged(true);
-        skorBtn.setVisible(true);
-        skorBtn.setManaged(true);
 
         // Uyarı mesajı
         etiket.setText("🫘 Mehmet Emmi'nin Leblebi Tarlası Modu Açıldı!");
@@ -350,14 +347,184 @@ public class MinesweeperApp extends Application {
     //  KLASİK OYUN
     // =========================================================================
 
+    // ── Preset zorluklar ─────────────────────────────────────────────────────
+
+    private record KlasikAyar(String etiket, int satir, int sutun, int mayin, boolean geriSayim, int sure) {}
+
+    private static final KlasikAyar[] PRESETLER = {
+        new KlasikAyar("😊 Kolay",             8,  8,  8,  false, 0),
+        new KlasikAyar("😊⏱ Kolay (Zamanlı)", 8,  8,  8,  true, 120),
+        new KlasikAyar("😐 Orta",              10, 10, 15, false, 0),
+        new KlasikAyar("😐⏱ Orta (Zamanlı)",  10, 10, 15, true, 180),
+        new KlasikAyar("😈 Zor",               16, 16, 40, false, 0),
+        new KlasikAyar("😈⏱ Zor (Zamanlı)",   16, 16, 40, true, 300),
+    };
+
     private void klasikOyunuBaslat() {
-        satirSayisi  = KLASIK_SATIR;
-        sutunSayisi  = KLASIK_SUTUN;
-        mayinSayisi  = KLASIK_MAYIN;
-        leblebModu   = false;
-        leblebiBoardMode = null;
-        tahta = new Board(satirSayisi, sutunSayisi, mayinSayisi);
-        oyunSahnesiniBaSlat(false);
+        // Show the setup dialog; actual game start happens inside it
+        klasikAyarDialogGoster();
+    }
+
+    private void klasikAyarDialogGoster() {
+        Stage dialog = new Stage();
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.initOwner(pencere);
+        dialog.setTitle("Klasik Oyun Ayarları");
+        dialog.setResizable(false);
+
+        String arka = "#1e1e2e", yazi = "#cdd6f4", vurgu = "#89b4fa",
+               girdiArka = "#181825", ayrac = "#313244";
+
+        // ── Preset butonları ──────────────────────────────────────────────────
+        Label presetBaslik = new Label("Hazır Zorluklar");
+        presetBaslik.setStyle("-fx-font-size:14px;-fx-font-weight:bold;-fx-text-fill:" + vurgu + ";");
+
+        GridPane presetGrid = new GridPane();
+        presetGrid.setHgap(8);
+        presetGrid.setVgap(8);
+
+        // We'll use these Spinner references to update them when a preset is chosen
+        // Create them first (default = medium) then wire presets
+        Spinner<Integer> satirSpinner = yapSpinner(7, 30, 10);
+        Spinner<Integer> sutunSpinner = yapSpinner(7, 30, 10);
+        Spinner<Integer> mayinSpinner = yapSpinner(4, 500, 15);
+        ToggleGroup timerGrup = new ToggleGroup();
+        RadioButton yukariBtn = new RadioButton("⬆ Yukarı sayar (kronometre)");
+        RadioButton geriBtn   = new RadioButton("⬇ Geri sayar (süre sınırlı)");
+        yukariBtn.setToggleGroup(timerGrup);
+        geriBtn.setToggleGroup(timerGrup);
+        yukariBtn.setSelected(true);
+        yukariBtn.setStyle("-fx-text-fill:" + yazi + ";");
+        geriBtn.setStyle("-fx-text-fill:" + yazi + ";");
+        Spinner<Integer> sureSpinner = yapSpinner(10, 3600, 180);
+        sureSpinner.setDisable(true);
+
+        geriBtn.selectedProperty().addListener((obs, eski, yeni) -> sureSpinner.setDisable(!yeni));
+
+        for (int i = 0; i < PRESETLER.length; i++) {
+            KlasikAyar p = PRESETLER[i];
+            Button pb = new Button(p.etiket());
+            pb.setPrefWidth(200);
+            pb.setStyle(
+                "-fx-background-color:#313244;-fx-text-fill:" + yazi + ";" +
+                "-fx-background-radius:8;-fx-border-radius:8;" +
+                "-fx-border-color:" + ayrac + ";-fx-cursor:hand;-fx-font-size:12px;"
+            );
+            pb.setOnMouseEntered(e -> pb.setStyle(pb.getStyle().replace("#313244","#45475a")));
+            pb.setOnMouseExited(e  -> pb.setStyle(pb.getStyle().replace("#45475a","#313244")));
+            pb.setOnAction(e -> {
+                satirSpinner.getValueFactory().setValue(p.satir());
+                sutunSpinner.getValueFactory().setValue(p.sutun());
+                mayinSpinner.getValueFactory().setValue(p.mayin());
+                if (p.geriSayim()) {
+                    geriBtn.setSelected(true);
+                    sureSpinner.getValueFactory().setValue(p.sure());
+                } else {
+                    yukariBtn.setSelected(true);
+                }
+            });
+            presetGrid.add(pb, i % 2, i / 2);
+        }
+
+        // ── Özel ayar alanı ──────────────────────────────────────────────────
+        Label ozelBaslik = new Label("Ya da Özel Ayarla");
+        ozelBaslik.setStyle("-fx-font-size:14px;-fx-font-weight:bold;-fx-text-fill:" + vurgu + ";");
+
+        Label satirLbl = etiketOlustur("Satır sayısı:", yazi);
+        Label sutunLbl = etiketOlustur("Sütun sayısı:", yazi);
+        Label mayinLbl = etiketOlustur("Mayın sayısı:", yazi);
+        Label sureLbl  = etiketOlustur("Süre (saniye):", yazi);
+
+        // Clamp mines when rows/cols change
+        Runnable mayinKlamp = () -> {
+            int maks = Math.max(1, satirSpinner.getValue() * sutunSpinner.getValue() - 9);
+            if (mayinSpinner.getValue() > maks)
+                ((SpinnerValueFactory.IntegerSpinnerValueFactory) mayinSpinner.getValueFactory()).setMax(maks);
+            ((SpinnerValueFactory.IntegerSpinnerValueFactory) mayinSpinner.getValueFactory()).setMax(maks);
+        };
+        satirSpinner.valueProperty().addListener((o,e,n) -> mayinKlamp.run());
+        sutunSpinner.valueProperty().addListener((o,e,n) -> mayinKlamp.run());
+
+        GridPane ozelGrid = new GridPane();
+        ozelGrid.setHgap(12);
+        ozelGrid.setVgap(10);
+        ozelGrid.addRow(0, satirLbl, satirSpinner);
+        ozelGrid.addRow(1, sutunLbl, sutunSpinner);
+        ozelGrid.addRow(2, mayinLbl, mayinSpinner);
+
+        // ── Timer bölümü ──────────────────────────────────────────────────────
+        Label timerBaslik = new Label("Zamanlayıcı Modu");
+        timerBaslik.setStyle("-fx-font-size:14px;-fx-font-weight:bold;-fx-text-fill:" + vurgu + ";");
+
+        GridPane timerGrid = new GridPane();
+        timerGrid.setHgap(12);
+        timerGrid.setVgap(8);
+        timerGrid.addRow(0, yukariBtn);
+        timerGrid.addRow(1, geriBtn);
+        timerGrid.addRow(2, sureLbl, sureSpinner);
+
+        // Stil: spinnerler
+        for (Spinner<?> sp : new Spinner<?>[]{ satirSpinner, sutunSpinner, mayinSpinner, sureSpinner })
+            sp.setStyle("-fx-background-color:" + girdiArka + ";-fx-text-fill:" + yazi + ";");
+
+        // ── Oyna butonu ───────────────────────────────────────────────────────
+        Button oynaBtn = new Button("▶  Oyna!");
+        oynaBtn.setPrefWidth(180);
+        oynaBtn.setPrefHeight(44);
+        oynaBtn.setStyle(
+            "-fx-background-color:#89b4fa;-fx-text-fill:#1e1e2e;" +
+            "-fx-font-size:15px;-fx-font-weight:bold;" +
+            "-fx-background-radius:10;-fx-cursor:hand;"
+        );
+        oynaBtn.setOnAction(e -> {
+            satirSayisi  = satirSpinner.getValue();
+            sutunSayisi  = sutunSpinner.getValue();
+            mayinSayisi  = Math.min(mayinSpinner.getValue(), satirSayisi * sutunSayisi - 9);
+            klasikGeriSayim  = geriBtn.isSelected();
+            klasikSureSaniye = klasikGeriSayim ? sureSpinner.getValue() : 0;
+            klasikBaslangicSure = klasikSureSaniye;
+            leblebModu       = false;
+            leblebiBoardMode = null;
+            tahta = new Board(satirSayisi, sutunSayisi, mayinSayisi);
+            dialog.close();
+            oyunSahnesiniBaSlat(false);
+        });
+
+        // ── Ana layout ────────────────────────────────────────────────────────
+        Separator sep1 = new Separator(); sep1.setStyle("-fx-background-color:" + ayrac + ";");
+        Separator sep2 = new Separator(); sep2.setStyle("-fx-background-color:" + ayrac + ";");
+
+        VBox kok = new VBox(14,
+            presetBaslik, presetGrid,
+            sep1,
+            ozelBaslik, ozelGrid,
+            sep2,
+            timerBaslik, timerGrid,
+            oynaBtn
+        );
+        kok.setPadding(new Insets(24));
+        kok.setAlignment(Pos.CENTER_LEFT);
+        kok.setStyle("-fx-background-color:" + arka + ";");
+
+        Scene dialogSahne = new Scene(kok);
+        globalCssUygula(dialogSahne);
+        dialog.setScene(dialogSahne);
+        dialog.showAndWait();
+    }
+
+    /** Convenience factory for a styled integer Spinner. */
+    private Spinner<Integer> yapSpinner(int min, int max, int baslangic) {
+        Spinner<Integer> sp = new Spinner<>(min, max, Math.max(min, Math.min(max, baslangic)));
+        sp.setEditable(true);
+        sp.setPrefWidth(100);
+        return sp;
+    }
+
+    /** Convenience factory for a simple styled Label. */
+    private Label etiketOlustur(String metin, String renk) {
+        Label l = new Label(metin);
+        l.setStyle("-fx-text-fill:" + renk + ";-fx-font-size:13px;");
+        return l;
     }
 
     // =========================================================================
@@ -483,6 +650,13 @@ public class MinesweeperApp extends Application {
             zamanlayiciEtiketi.setText("⏳ " + leblebiBoardMode.getKalanSure() + "s");
             canEtiketi.setText("❤ x" + leblebiBoardMode.getCanSayisi());
             puanEtiketi.setText("🫘 " + leblebiBoardMode.getLeblebPuani() + " puan");
+        } else if (klasikGeriSayim) {
+            zamanlayiciEtiketi.setText("⏳ " + klasikSureSaniye + "s");
+            zamanlayiciEtiketi.setStyle(
+                "-fx-font-size: 19px; -fx-font-weight: bold; -fx-padding: 4 12 4 12;" +
+                "-fx-background-radius: 8; -fx-text-fill: #cdd6f4;");
+            canEtiketi.setText("");
+            puanEtiketi.setText("");
         } else {
             zamanlayiciEtiketi.setText("⏱ 0s");
             canEtiketi.setText("");
@@ -808,7 +982,7 @@ public class MinesweeperApp extends Application {
         // Yeni bayrak koyacaksak ama sayaç sıfıra geldi mi? İzin verme.
         if (!isaretliydi && yerlestirilenIsaret >= mayinSayisi) return;
 
-        hucre.isaretiBegistir();
+        hucre.isaretiDegistir();
         yerlestirilenIsaret += isaretliydi ? -1 : 1;
         yerlestirilenIsaret = Math.max(0, yerlestirilenIsaret); // hiçbir zaman negatife düşmesin
 
@@ -828,17 +1002,54 @@ public class MinesweeperApp extends Application {
                 leblebiBoardMode.sureyiGuncelle(1);
                 int kalan = leblebiBoardMode.getKalanSure();
                 zamanlayiciEtiketi.setText("⏳ " + kalan + "s");
-                if (kalan <= 15)
+                if (kalan <= 10) {
+                    // Flash red: alternate between red and white every tick
+                    boolean flash = (kalan % 2 == 0);
                     zamanlayiciEtiketi.setStyle(
                         "-fx-font-size: 19px; -fx-font-weight: bold; -fx-padding: 4 12 4 12;" +
-                        "-fx-background-radius: 8; -fx-text-fill: #e74c3c;");
-                else
+                        "-fx-background-radius: 8; -fx-text-fill: " + (flash ? "#e74c3c" : "#ffffff") + ";");
+                } else {
                     zamanlayiciEtiketi.setStyle(
                         "-fx-font-size: 19px; -fx-font-weight: bold; -fx-padding: 4 12 4 12;" +
-                        "-fx-background-radius: 8;");
+                        "-fx-background-radius: 8; -fx-text-fill: #cdd6f4;");
+                }
                 if (leblebiBoardMode.isOyunBitti()) {
                     zamanlayici.stop();
                     arayuzuGuncelle();
+                }
+            } else if (klasikGeriSayim) {
+                // Klasik geri sayım modu
+                klasikSureSaniye = Math.max(0, klasikSureSaniye - 1);
+                zamanlayiciEtiketi.setText("⏳ " + klasikSureSaniye + "s");
+                if (klasikSureSaniye <= 10) {
+                    boolean flash = (klasikSureSaniye % 2 == 0);
+                    zamanlayiciEtiketi.setStyle(
+                        "-fx-font-size: 19px; -fx-font-weight: bold; -fx-padding: 4 12 4 12;" +
+                        "-fx-background-radius: 8; -fx-text-fill: " + (flash ? "#e74c3c" : "#ffffff") + ";");
+                } else {
+                    zamanlayiciEtiketi.setStyle(
+                        "-fx-font-size: 19px; -fx-font-weight: bold; -fx-padding: 4 12 4 12;" +
+                        "-fx-background-radius: 8; -fx-text-fill: #cdd6f4;");
+                }
+                if (klasikSureSaniye <= 0) {
+                    // Süre doldu — tüm mayınlar patlar
+                    zamanlayici.stop();
+                    tahta.tumMayinlariGoster();
+                    // Force game-over flag via the reveal path
+                    // We simulate a mine-hit by marking oyunBitti through Board's ac()
+                    // approach: reveal a mine cell directly by calling setOyunBitti
+                    // Board doesn't expose setOyunBitti, so we trigger it by opening a mine.
+                    // Simplest: mark via flag & redraw.
+                    durumEtiketi.setText("⏰ Süre Doldu! Tüm Mayınlar Patladı!");
+                    durumEtiketi.setStyle("-fx-font-size: 15px; -fx-font-weight: bold;" +
+                        "-fx-text-fill: #f38ba8;");
+                    sifirlaBtn.setText("😵");
+                    sesCal(sesPatlama);
+                    arayuzuGuncelle();
+                    // Disable all buttons
+                    if (dugmeler != null)
+                        for (Button[] satir : dugmeler)
+                            for (Button btn : satir) btn.setDisable(true);
                 }
             } else {
                 gecenSaniyeKlasik++;
@@ -862,7 +1073,7 @@ public class MinesweeperApp extends Application {
                                "-fx-background-radius: 8;";
         String hudPuanStil   = "-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #f0c040;" +
                                "-fx-padding: 4 12 4 12; -fx-background-radius: 8;";
-        zamanlayiciEtiketi.setStyle(hudLabelStil + (leblebModu ? "-fx-text-fill:#cdd6f4;" : ""));
+        zamanlayiciEtiketi.setStyle(hudLabelStil + (leblebModu ? "-fx-text-fill:#cdd6f4;" : (klasikGeriSayim ? "-fx-text-fill:#cdd6f4;" : "")));
         puanEtiketi.setStyle(hudPuanStil);
         canEtiketi.setStyle(hudLabelStil + "-fx-text-fill: #ff6b6b;");
         durumEtiketi.setStyle("-fx-font-size: 15px; -fx-font-weight: bold;");
@@ -877,6 +1088,7 @@ public class MinesweeperApp extends Application {
         } else {
             tahta = new Board(satirSayisi, sutunSayisi, mayinSayisi);
             leblebiBoardMode = null;
+            if (klasikGeriSayim) klasikSureSaniye = klasikBaslangicSure; // restore countdown
         }
 
         guncelleUstBar();
@@ -1017,9 +1229,16 @@ public class MinesweeperApp extends Application {
                 zamanlayici.stop();
                 sesCal(sesKazan);
                 sifirlaBtn.setText("😎");
-                durumEtiketi.setText("★ Kazandınız! (" + gecenSaniyeKlasik + "s)");
+                String winMsg = klasikGeriSayim
+                    ? "★ Kazandınız! (" + klasikSureSaniye + "s kaldı)"
+                    : "★ Kazandınız! (" + gecenSaniyeKlasik + "s)";
+                durumEtiketi.setText(winMsg);
                 durumEtiketi.setStyle("-fx-font-size: 15px; -fx-font-weight: bold;" +
                     "-fx-text-fill: " + (karanlikTema ? "#a6e3a1" : "#2e7d32") + ";");
+                // Zamanlı modda skor kaydet
+                if (klasikGeriSayim) {
+                    javafx.application.Platform.runLater(this::klasikZamanliSkorKaydet);
+                }
             }
         }
     }
@@ -1140,85 +1359,343 @@ public class MinesweeperApp extends Application {
         menuGoster();
     }
 
+    // ── Klasik Zamanlı Skor Kaydet ────────────────────────────────────────────
+
+    private boolean klasikSkorKaydedildi = false;
+
+    /**
+     * Timed classic scoring formula:
+     *   base         = kalan süre × 10
+     *   hız bonusu   = max(0, (sureSiniri - gecenSure) × 5)   [hızlı bitiş ödülü]
+     *   zorluk çarpanı = mine density (0.0–1.0) × 200         [daha yüksek mayın yoğunluğu = daha fazla]
+     *   toplam skor  = base + hızBonusu + (int)zorCarpan
+     *
+     * Bu formül sadece kalan süreyi değil, oyunun ne kadar sürdüğünü ve ızgaranın
+     * ne kadar zor olduğunu da hesaba katar.
+     */
+    private int klasikZamanliSkorHesapla() {
+        int toplamHucre = satirSayisi * sutunSayisi;
+        int kalanSure   = klasikSureSaniye;                        // seconds left when won
+        int gecenSure   = klasikBaslangicSure - kalanSure;        // how long it took
+        double yogunluk = (double) mayinSayisi / toplamHucre;     // 0.0 – 1.0
+        int base        = kalanSure * 10;
+        int hizBonusu   = Math.max(0, (klasikBaslangicSure / 3 - gecenSure) * 5);
+        int zorCarpan   = (int) (yogunluk * 200);
+        return base + hizBonusu + zorCarpan;
+    }
+
+    private void klasikZamanliSkorKaydet() {
+        if (klasikSkorKaydedildi) return;
+        klasikSkorKaydedildi = true;
+
+        int skor       = klasikZamanliSkorHesapla();
+        int kalanSure  = klasikSureSaniye;
+        int gecenSure  = klasikBaslangicSure - kalanSure;
+        double yogunluk = (double) mayinSayisi / (satirSayisi * sutunSayisi) * 100;
+
+        // Try to match a preset label for the grid
+        String presetEtiket = "";
+        for (KlasikAyar p : PRESETLER) {
+            if (p.geriSayim() && p.satir() == satirSayisi && p.sutun() == sutunSayisi
+                    && p.mayin() == mayinSayisi && p.sure() == klasikBaslangicSure) {
+                presetEtiket = p.etiket();
+                break;
+            }
+        }
+        String seviyeGoster = presetEtiket.isBlank()
+            ? satirSayisi + "×" + sutunSayisi + ", " + mayinSayisi + " mayın"
+            : presetEtiket;
+
+        TextInputDialog dlg = new TextInputDialog("Oyuncu");
+        dlg.setTitle("Skor Tablosu");
+        dlg.setHeaderText("⏱ Tebrikler! Zamanlı Modu Kazandınız!");
+        dlg.setContentText(String.format(
+            "Zorluk: %s%n" +
+            "Izgara: %d×%d  |  Mayın: %d  |  Süre limiti: %ds%n" +
+            "Geçen süre: %ds  |  Kalan süre: %ds%n" +
+            "Mayın yoğunluğu: %.0f%%%n" +
+            "%n" +
+            "🏆 Skor: %d%n%n" +
+            "İsminizi girin:",
+            seviyeGoster,
+            satirSayisi, sutunSayisi, mayinSayisi, klasikBaslangicSure,
+            gecenSure, kalanSure,
+            yogunluk,
+            skor
+        ));
+        dialogStilUygula(dlg, false);
+
+        dlg.showAndWait().ifPresent(isim -> {
+            if (!isim.isBlank())
+                SkorTablosu.kaydet(isim.trim(), skor, 0, SkorTablosu.MOD_ZAMANLI,
+                    satirSayisi, sutunSayisi, mayinSayisi, klasikBaslangicSure);
+        });
+
+        klasikSkorKaydedildi = false;
+    }
+
     // ── Skor Tablosu ─────────────────────────────────────────────────────────
 
     private void skorTablosunuGoster() {
-        Stage skorPenceresi = new Stage();
-        skorPenceresi.setTitle("En Iyi Tarimcilar");
-        skorPenceresi.initModality(Modality.APPLICATION_MODAL);
+        Stage pencere2 = new Stage();
+        pencere2.setTitle("Skor Tablosu");
+        pencere2.initModality(Modality.APPLICATION_MODAL);
+        pencere2.initOwner(pencere);
 
-        VBox kok = new VBox(16);
-        kok.setPadding(new Insets(24));
-        kok.setStyle("-fx-background-color: #1e1e2e;");
-        kok.setAlignment(Pos.TOP_CENTER);
+        String arka = "#1e1e2e", tabloBg = "#181825";
 
-        Label baslik = new Label("🏆 En İyi Tarımcılar");
-        baslik.setStyle(
-            "-fx-font-size: 24px; -fx-font-weight: bold;" +
-            "-fx-text-fill: #c89a2a;"
+        TabPane sekmeler = new TabPane();
+        sekmeler.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+        sekmeler.setStyle(
+            "-fx-background-color:" + arka + ";" +
+            "-fx-tab-min-width:160px;"
         );
 
-        java.util.List<SkorTablosu.SkorGirisi> liste = SkorTablosu.yukle();
+        // ── Tab 1: Klasik Zamanlı ─────────────────────────────────────────────
+        Tab zamanlıTab = new Tab("⏱ Klasik (Zamanlı)");
+        zamanlıTab.setContent(zamanlıSkorTabloIcerik(
+            SkorTablosu.yukle(SkorTablosu.MOD_ZAMANLI), arka, tabloBg, pencere2
+        ));
+        sekmeler.getTabs().add(zamanlıTab);
+
+        // ── Tab 2: Leblebi Tarlası (sadece Easter Egg açıksa) ────────────────
+        if (leblebAcildi) {
+            Tab leblebTab = new Tab("🫘 Leblebi Tarlası");
+            leblebTab.setContent(skorTabloIcerik(
+                SkorTablosu.yukle(SkorTablosu.MOD_LEBLEBI),
+                new String[]{"#", "İsim", "Skor", "Seviye", "Tarih"},
+                (g, i) -> new String[]{
+                    (i + 1) + ".",
+                    g.isim() == null || g.isim().isBlank() ? "—" : g.isim(),
+                    String.valueOf(g.skor()),
+                    g.seviye() <= 0 ? "—" : "Seviye " + g.seviye(),
+                    g.tarih() == null || g.tarih().isBlank() ? "—" : g.tarih()
+                },
+                "Henüz kayıt yok.\nLeblebi Tarlası'nı oyna ve adını yazdır!",
+                arka, tabloBg
+            ));
+            sekmeler.getTabs().add(leblebTab);
+        }
+
+        // ── Kapat butonu ──────────────────────────────────────────────────────
+        Button kapat = new Button("Kapat");
+        kapat.setStyle(butonTarzi() + "-fx-background-color:#313244;-fx-text-fill:#cdd6f4;");
+        kapat.setOnAction(e -> pencere2.close());
+
+        Label ipucu = new Label("💡 Bir satıra tıklayarak ayrıntıları görebilirsin");
+        ipucu.setStyle("-fx-text-fill:#6c7086;-fx-font-size:11px;");
+
+        VBox kok = new VBox(8, sekmeler, ipucu, kapat);
+        kok.setPadding(new Insets(16));
+        kok.setAlignment(Pos.TOP_CENTER);
+        kok.setStyle("-fx-background-color:" + arka + ";");
+        VBox.setVgrow(sekmeler, Priority.ALWAYS);
+
+        Scene s = new Scene(kok, 640, 520);
+        s.setFill(javafx.scene.paint.Color.web(arka));
+        globalCssUygula(s);
+        pencere2.setScene(s);
+        pencere2.showAndWait();
+    }
+
+    /**
+     * Builds the timed-mode tab with preset label column and clickable rows for verbose detail.
+     */
+    private javafx.scene.Node zamanlıSkorTabloIcerik(
+            java.util.List<SkorTablosu.SkorGirisi> liste,
+            String arka, String tabloBg, Stage owner) {
 
         GridPane tablo = new GridPane();
-        tablo.setHgap(20);
+        tablo.setHgap(18);
         tablo.setVgap(8);
-        tablo.setStyle("-fx-background-color: #181825; -fx-padding: 16; -fx-background-radius: 10;");
+        tablo.setStyle("-fx-background-color:" + tabloBg + ";-fx-padding:16;-fx-background-radius:10;");
         tablo.setAlignment(Pos.CENTER);
 
-        // Başlık satırı
-        String[] basliklar = {"#", "İsim", "Skor", "Seviye", "Tarih"};
+        String[] basliklar = {"#", "İsim", "Skor", "Zorluk", "Tarih"};
         for (int i = 0; i < basliklar.length; i++) {
             Label lbl = new Label(basliklar[i]);
-            lbl.setStyle("-fx-font-weight: bold; -fx-text-fill: #89b4fa; -fx-font-size: 13px;");
+            lbl.setStyle("-fx-font-weight:bold;-fx-text-fill:#89b4fa;-fx-font-size:13px;");
             tablo.add(lbl, i, 0);
         }
 
         if (liste.isEmpty()) {
-            Label bos = new Label("Henüz kayıt yok. Oyna ve adını yazdır!");
-            bos.setStyle("-fx-text-fill: #6c7086; -fx-font-size: 13px;");
-            tablo.add(bos, 0, 1, 5, 1);
+            Label bos = new Label("Henüz kayıt yok.\nZamanlı modda oyna ve adını yazdır!");
+            bos.setStyle("-fx-text-fill:#6c7086;-fx-font-size:13px;");
+            bos.setWrapText(true);
+            tablo.add(bos, 0, 1, basliklar.length, 1);
         } else {
             for (int i = 0; i < Math.min(liste.size(), 20); i++) {
                 SkorTablosu.SkorGirisi g = liste.get(i);
-                String isimGoster  = (g.isim()  == null || g.isim().isBlank())  ? "—" : g.isim();
-                String tarihGoster = (g.tarih() == null || g.tarih().isBlank()) ? "—" : g.tarih();
-                String seviyeGoster = g.seviye() <= 0 ? "Klasik" : "Seviye " + g.seviye();
+                String renk = i == 0 ? "#f1c40f" : i == 1 ? "#95a5a6" : i == 2 ? "#e67e22" : "#cdd6f4";
+
+                // Determine preset label or grid string
+                String zorlukEtiketi = presetEtiketiAl(g);
+
                 String[] degerler = {
                     (i + 1) + ".",
-                    isimGoster,
+                    g.isim() == null || g.isim().isBlank() ? "—" : g.isim(),
                     String.valueOf(g.skor()),
-                    seviyeGoster,
-                    tarihGoster
+                    zorlukEtiketi,
+                    g.tarih() == null || g.tarih().isBlank() ? "—" : g.tarih()
                 };
-                String renk = i == 0 ? "#f1c40f" : i == 1 ? "#95a5a6" : i == 2 ? "#e67e22" : "#cdd6f4";
+
+                // Build labels for this row; clicking any opens detail popup
+                final int rowIdx = i;
+                final SkorTablosu.SkorGirisi girdi = g;
                 for (int j = 0; j < degerler.length; j++) {
                     Label lbl = new Label(degerler[j]);
-                    lbl.setStyle("-fx-text-fill: " + renk + "; -fx-font-size: 12px;");
+                    lbl.setStyle("-fx-text-fill:" + renk + ";-fx-font-size:12px;-fx-cursor:hand;");
+                    lbl.setOnMouseEntered(e -> lbl.setStyle(lbl.getStyle().replace("-fx-cursor:hand;",
+                        "-fx-cursor:hand;-fx-underline:true;")));
+                    lbl.setOnMouseExited(e -> lbl.setStyle(lbl.getStyle().replace("-fx-underline:true;", "")));
+                    lbl.setOnMouseClicked(e -> zamanlıDetayGoster(girdi, rowIdx, owner));
                     tablo.add(lbl, j, i + 1);
                 }
             }
         }
 
-        Button kapat = new Button("Kapat");
-        kapat.setStyle(butonTarzi() + "-fx-background-color: #313244; -fx-text-fill: #cdd6f4;");
-        kapat.setOnAction(e -> skorPenceresi.close());
-
         ScrollPane scroll = new ScrollPane(tablo);
-        scroll.setStyle("-fx-background-color: #1e1e2e; -fx-background: #1e1e2e;");
+        scroll.setStyle("-fx-background-color:" + arka + ";-fx-background:" + arka + ";");
         scroll.setFitToWidth(true);
-        // Viewport arka planını da boyalı yap — beyaz pixel sorununu önler
         scroll.viewportBoundsProperty().addListener((obs, ov, nv) -> {
             javafx.scene.Node vp = scroll.lookup(".viewport");
-            if (vp != null) vp.setStyle("-fx-background-color: #1e1e2e;");
+            if (vp != null) vp.setStyle("-fx-background-color:" + arka + ";");
         });
 
-        kok.getChildren().addAll(baslik, scroll, kapat);
+        VBox wrapper = new VBox(scroll);
+        wrapper.setStyle("-fx-background-color:" + arka + ";-fx-padding:12;");
+        VBox.setVgrow(scroll, Priority.ALWAYS);
+        return wrapper;
+    }
 
-        Scene sahne2 = new Scene(kok, 560, 480);
-        sahne2.setFill(javafx.scene.paint.Color.web("#1e1e2e"));
-        skorPenceresi.setScene(sahne2);
-        skorPenceresi.showAndWait();
+    /**
+     * Returns a human-readable difficulty label for a score entry.
+     * Tries to match a preset; falls back to raw grid info.
+     */
+    private String presetEtiketiAl(SkorTablosu.SkorGirisi g) {
+        if (g.satirSayisi() > 0) {
+            // Try to match a named preset
+            for (KlasikAyar p : PRESETLER) {
+                if (p.geriSayim()
+                        && p.satir() == g.satirSayisi()
+                        && p.sutun() == g.sutunSayisi()
+                        && p.mayin() == g.mayinSayisi()
+                        && p.sure()  == g.sureSiniri()) {
+                    // Strip the emoji prefix for a compact label
+                    String e = p.etiket();
+                    int spaceIdx = e.indexOf(' ');
+                    return spaceIdx >= 0 ? e.substring(spaceIdx + 1) : e;
+                }
+            }
+            // Custom grid
+            double yogunluk = (double) g.mayinSayisi() / (g.satirSayisi() * g.sutunSayisi()) * 100;
+            return String.format("%d×%d / %d💣 / %.0f%%", g.satirSayisi(), g.sutunSayisi(), g.mayinSayisi(), yogunluk);
+        }
+        return "—";   // old entry without grid metadata
+    }
+
+    /**
+     * Shows a verbose detail popup for a timed-mode score entry.
+     */
+    private void zamanlıDetayGoster(SkorTablosu.SkorGirisi g, int sira, Stage owner) {
+        Alert dlg = new Alert(Alert.AlertType.INFORMATION);
+        dlg.initOwner(owner);
+        dlg.setTitle("Skor Detayı");
+        dlg.setHeaderText(String.format("#%d — %s", sira + 1, g.isim()));
+
+        String gridBilgi;
+        if (g.satirSayisi() > 0) {
+            int toplamHucre = g.satirSayisi() * g.sutunSayisi();
+            double yogunluk = (double) g.mayinSayisi() / toplamHucre * 100;
+            int kalanSure   = g.sureSiniri() > 0
+                ? (int) Math.round((double) g.skor() / 10)   // approx from base component
+                : 0;
+            gridBilgi = String.format(
+                "Izgara       : %d satır × %d sütun (%d hücre)%n" +
+                "Mayın sayısı : %d  (yoğunluk: %.1f%%)%n" +
+                "Süre limiti  : %d saniye%n" +
+                "%n" +
+                "🏆 Skor      : %d%n" +
+                "📅 Tarih     : %s",
+                g.satirSayisi(), g.sutunSayisi(), toplamHucre,
+                g.mayinSayisi(), yogunluk,
+                g.sureSiniri(),
+                g.skor(),
+                g.tarih() == null || g.tarih().isBlank() ? "—" : g.tarih()
+            );
+        } else {
+            gridBilgi = String.format(
+                "🏆 Skor  : %d%n" +
+                "📅 Tarih : %s%n%n" +
+                "(Bu kayıt eski sürümde oluşturuldu — ızgara bilgisi mevcut değil)",
+                g.skor(),
+                g.tarih() == null || g.tarih().isBlank() ? "—" : g.tarih()
+            );
+        }
+
+        dlg.setContentText(gridBilgi);
+        dialogStilUygula(dlg, false);
+        dlg.showAndWait();
+    }
+
+    /**
+     * Builds the scrollable table content for one scoreboard tab (generic version).
+     *
+     * @param liste       filtered, sorted score entries
+     * @param basliklar   column headers
+     * @param satirUret   lambda: (entry, rowIndex) → String[] of cell values
+     * @param bosMsg      message shown when the list is empty
+     */
+    private javafx.scene.Node skorTabloIcerik(
+            java.util.List<SkorTablosu.SkorGirisi> liste,
+            String[] basliklar,
+            java.util.function.BiFunction<SkorTablosu.SkorGirisi, Integer, String[]> satirUret,
+            String bosMsg,
+            String arka, String tabloBg) {
+
+        GridPane tablo = new GridPane();
+        tablo.setHgap(22);
+        tablo.setVgap(8);
+        tablo.setStyle("-fx-background-color:" + tabloBg + ";-fx-padding:16;-fx-background-radius:10;");
+        tablo.setAlignment(Pos.CENTER);
+
+        // Header row
+        for (int i = 0; i < basliklar.length; i++) {
+            Label lbl = new Label(basliklar[i]);
+            lbl.setStyle("-fx-font-weight:bold;-fx-text-fill:#89b4fa;-fx-font-size:13px;");
+            tablo.add(lbl, i, 0);
+        }
+
+        if (liste.isEmpty()) {
+            Label bos = new Label(bosMsg);
+            bos.setStyle("-fx-text-fill:#6c7086;-fx-font-size:13px;");
+            bos.setWrapText(true);
+            tablo.add(bos, 0, 1, basliklar.length, 1);
+        } else {
+            for (int i = 0; i < Math.min(liste.size(), 20); i++) {
+                SkorTablosu.SkorGirisi g = liste.get(i);
+                String[] degerler = satirUret.apply(g, i);
+                String renk = i == 0 ? "#f1c40f" : i == 1 ? "#95a5a6" : i == 2 ? "#e67e22" : "#cdd6f4";
+                for (int j = 0; j < degerler.length; j++) {
+                    Label lbl = new Label(degerler[j]);
+                    lbl.setStyle("-fx-text-fill:" + renk + ";-fx-font-size:12px;");
+                    tablo.add(lbl, j, i + 1);
+                }
+            }
+        }
+
+        ScrollPane scroll = new ScrollPane(tablo);
+        scroll.setStyle("-fx-background-color:" + arka + ";-fx-background:" + arka + ";");
+        scroll.setFitToWidth(true);
+        scroll.viewportBoundsProperty().addListener((obs, ov, nv) -> {
+            javafx.scene.Node vp = scroll.lookup(".viewport");
+            if (vp != null) vp.setStyle("-fx-background-color:" + arka + ";");
+        });
+
+        VBox wrapper = new VBox(scroll);
+        wrapper.setStyle("-fx-background-color:" + arka + ";-fx-padding:12;");
+        VBox.setVgrow(scroll, Priority.ALWAYS);
+        return wrapper;
     }
 
     // ── Hücre Boyut Güncelleme ────────────────────────────────────────────────
