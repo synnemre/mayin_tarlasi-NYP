@@ -28,7 +28,7 @@ public class Cell {
         this.acildiMi = false;
     }
 
-    public void isaretiBegistir() {
+    public void isaretiDegistir() {
         if (!acildiMi) this.isaretlendi = !this.isaretlendi;
     }
 
@@ -40,6 +40,6 @@ public class Cell {
     public boolean isFlagged()      { return isaretlendi; }
     public int     getNeighborMines(){ return komsuMayinSayisi; }
     public void    reveal()         { ac(); }
-    public void    toggleFlag()     { isaretiBegistir(); }
+    public void    toggleFlag()     { isaretiDegistir(); }
     public boolean isEmpty()        { return bosHucreMi(); }
 }
