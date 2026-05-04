@@ -534,12 +534,12 @@ public class MinesweeperApp extends Application {
     private void leblebOyunuBaslat() {
         yilanHucreleri.clear();
         Seviye seviye = Seviye.getSeviye(mevcutSeviye);
-        satirSayisi  = seviye.satirSayisi;
-        sutunSayisi  = seviye.sutunSayisi;
-        mayinSayisi  = seviye.solucanSayisi;
+        satirSayisi  = seviye.getSatirSayisi();
+        sutunSayisi  = seviye.getSutunSayisi();
+        mayinSayisi  = seviye.getSolucanSayisi();
         leblebiBoardMode = new LeblebiBoardMode(
             satirSayisi, sutunSayisi, mayinSayisi,
-            seviye.sureSaniye, KLASIK_CAN
+            seviye.getSureSaniye(), KLASIK_CAN
         );
         tahta = leblebiBoardMode.getTahta();
         oyunSahnesiniBaSlat(true);
@@ -746,7 +746,7 @@ public class MinesweeperApp extends Application {
         baslik.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #f5e6b0;" +
                         "-fx-padding: 0 0 4 0;");
 
-        Label seviyeEtiketi = new Label("Seviye " + mevcutSeviye + ": " + seviye.isim);
+        Label seviyeEtiketi = new Label("Seviye " + mevcutSeviye + ": " + seviye.getIsim());
         seviyeEtiketi.setStyle("-fx-font-size: 11px; -fx-text-fill: #c89a2a;");
         seviyeEtiketi.setWrapText(true);
 
@@ -956,7 +956,7 @@ public class MinesweeperApp extends Application {
         } else {
             // ── Klasik mod ────────────────────────────────────────────────────
             boolean solucanMiydi = tahta.getHucre(s, u).isMayinMi();
-            tahta.ac(s, u);
+            tahta.acKlasik(s, u);
             sesCal(solucanMiydi ? sesPatlama : sesKazma);
         }
     }
@@ -1082,7 +1082,7 @@ public class MinesweeperApp extends Application {
         if (leblebModu) {
             leblebiBoardMode = new LeblebiBoardMode(
                 satirSayisi, sutunSayisi, mayinSayisi,
-                Seviye.getSeviye(mevcutSeviye).sureSaniye, KLASIK_CAN
+                Seviye.getSeviye(mevcutSeviye).getSureSaniye(), KLASIK_CAN
             );
             tahta = leblebiBoardMode.getTahta();
         } else {
@@ -1268,14 +1268,14 @@ public class MinesweeperApp extends Application {
                 new ButtonType("Menüye Dön", ButtonBar.ButtonData.CANCEL_CLOSE)
             );
         } else {
-            String sonrakiIsim = Seviye.getSeviye(mevcutSeviye + 1).isim;
+            String sonrakiIsim = Seviye.getSeviye(mevcutSeviye + 1).getIsim();
             baslik = "✅ Seviye " + mevcutSeviye + " Tamamlandı!";
             icerik = String.format(
                 "%s temizlendi!\n\n" +
                 "Bu bölümde kazanılan puan: %d\n" +
                 "Toplam puan: %d\n\n" +
                 "Sıradaki bölüm: %s",
-                seviye.isim, leblebiBoardMode.getLeblebPuani(),
+                seviye.getIsim(), leblebiBoardMode.getLeblebPuani(),
                 toplamLeblebPuani, sonrakiIsim
             );
             dialog.getButtonTypes().addAll(

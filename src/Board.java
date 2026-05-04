@@ -29,19 +29,30 @@ public class Board {
                 izgara[s][u] = new Cell();
     }
 
-    private Set<Integer> guvenliiBolgeHesapla(int satir, int sutun) {
+    /**
+     * FIX (quality): Expanded to protect the full 3×3 neighbourhood around the
+     * first click, not just the clicked cell. On small boards (e.g. 8×8 / 5 mines)
+     * this prevents mines from landing directly adjacent to the opening move.
+     * Also renamed: removed the double-i typo (guvenliiBolge → guvenliBolge).
+     */
+    private Set<Integer> guvenliBolgeHesapla(int satir, int sutun) {
         Set<Integer> guvenli = new HashSet<>();
-        guvenli.add(satir * sutunSayisi + sutun);
+        for (int ds = -1; ds <= 1; ds++)
+            for (int du = -1; du <= 1; du++) {
+                int ys = satir + ds, yu = sutun + du;
+                if (sinirIcindeMi(ys, yu))
+                    guvenli.add(ys * sutunSayisi + yu);
+            }
         return guvenli;
     }
 
-    private void mayinlariYerlestir(Set<Integer> guvenliiBolge) {
+    private void mayinlariYerlestir(Set<Integer> guvenliBolge) {
         int yerlestirilen = 0;
         SecureRandom rastgele = new SecureRandom();
         while (yerlestirilen < toplamMayin) {
             int s = rastgele.nextInt(satirSayisi);
             int u = rastgele.nextInt(sutunSayisi);
-            if (!izgara[s][u].isMayinMi() && !guvenliiBolge.contains(s * sutunSayisi + u)) {
+            if (!izgara[s][u].isMayinMi() && !guvenliBolge.contains(s * sutunSayisi + u)) {
                 izgara[s][u].setMayin(true);
                 yerlestirilen++;
             }
@@ -71,7 +82,7 @@ public class Board {
     private void ilkTiklamaKontrol(int satir, int sutun) {
         if (ilkTiklama) {
             ilkTiklama = false;
-            mayinlariYerlestir(guvenliiBolgeHesapla(satir, sutun));
+            mayinlariYerlestir(guvenliBolgeHesapla(satir, sutun));
             komsuMayinlariHesapla();
         }
     }
@@ -95,14 +106,14 @@ public class Board {
             if (!useLives) {
                 // Classic mode: mine hit ends the game immediately
                 oyunBitti = true;
-                tumMayinlariAc();
+                tumMayinlariGoster();
             }
             // In lives mode: mine is revealed visually but game continues;
             // caller must remove the mine and refresh to keep playing
             return true;
         }
 
-        // Track opened safe cells
+        // Track opened safe cells — single place; flood-fill below uses this same path
         kapaliGuvenliHucre = Math.max(0, kapaliGuvenliHucre - 1);
 
         if (hucre.getKomsuMayinSayisi() > 0) return false;
@@ -116,8 +127,13 @@ public class Board {
         return false;
     }
 
-    /** Classic mode shorthand */
-    public void ac(int satir, int sutun) {
+    /**
+     * FIX (bug): Renamed from ac(int, int) to acKlasik(int, int) to make it
+     * explicit that this shorthand is for classic (no-lives) mode only.
+     * Using the old name in lives mode would silently end the game on a mine hit.
+     * Classic mode callers use this; LeblebiBoardMode always calls ac(s, u, true).
+     */
+    public void acKlasik(int satir, int sutun) {
         ac(satir, sutun, false);
     }
 
@@ -169,6 +185,11 @@ public class Board {
     /**
      * Zirai İlaç: destroys worms in a 3x3 area and safely opens all cells.
      * Returns number of mines destroyed.
+     *
+     * FIX (quality): The 3×3 cells are now opened via Board.ac() instead of
+     * directly calling Cell.ac() and manually adjusting kapaliGuvenliHucre.
+     * This means all decrement logic lives in one place (Board.ac), so future
+     * changes to the open path cannot accidentally desync the counter.
      */
     public int zirayiIlacUygula(int satir, int sutun) {
         if (!sinirIcindeMi(satir, sutun)) return 0;
@@ -188,26 +209,16 @@ public class Board {
                 }
             }
 
-        // 2. Recalculate neighbour counts for the whole board (fast for small grids)
+        // 2. Recalculate neighbour counts for the whole board
         komsuMayinlariHesapla();
 
-        // 3. Open all cells in the 3x3 area
+        // 3. Open all cells in the 3x3 area via Board.ac() so kapaliGuvenliHucre
+        //    is maintained in a single place, and empty-cell flood-fill is automatic.
         for (int ds = -1; ds <= 1; ds++)
             for (int du = -1; du <= 1; du++) {
                 int ys = satir + ds, yu = sutun + du;
-                if (sinirIcindeMi(ys, yu)) {
-                    Cell h = izgara[ys][yu];
-                    if (!h.isAcildiMi() && !h.isIsaretlendi()) {
-                        h.ac();
-                        kapaliGuvenliHucre = Math.max(0, kapaliGuvenliHucre - 1);
-                        if (h.getKomsuMayinSayisi() == 0) {
-                            for (int ds2 = -1; ds2 <= 1; ds2++)
-                                for (int du2 = -1; du2 <= 1; du2++)
-                                    if (!(ds2 == 0 && du2 == 0))
-                                        ac(ys + ds2, yu + du2, true);
-                        }
-                    }
-                }
+                if (sinirIcindeMi(ys, yu))
+                    ac(ys, yu, true);
             }
 
         return yokEdilenSolucan;
@@ -226,9 +237,8 @@ public class Board {
         return mayinlar.get(new SecureRandom().nextInt(mayinlar.size()));
     }
 
-    private void tumMayinlariAc() {
-        tumMayinlariGoster();
-    }
+    // FIX (minor): Removed the one-line tumMayinlariAc() wrapper — callers now
+    // call tumMayinlariGoster() directly, eliminating pointless indirection.
 
     /** Reveals all mines (used when classic game ends or lives run out). */
     public void tumMayinlariGoster() {
@@ -241,11 +251,11 @@ public class Board {
         return s >= 0 && s < satirSayisi && u >= 0 && u < sutunSayisi;
     }
 
-    public Cell getHucre(int s, int u) { return izgara[s][u]; }
-    public boolean isOyunBitti()       { return oyunBitti; }
-    public int getSatirSayisi()        { return satirSayisi; }
-    public int getSutunSayisi()        { return sutunSayisi; }
-    public int getToplamMayin()        { return toplamMayin; }
+    public Cell    getHucre(int s, int u) { return izgara[s][u]; }
+    public boolean isOyunBitti()          { return oyunBitti; }
+    public int     getSatirSayisi()       { return satirSayisi; }
+    public int     getSutunSayisi()       { return sutunSayisi; }
+    public int     getToplamMayin()       { return toplamMayin; }
 
     public boolean kazanildiMi() {
         // Fast path: use counter instead of scanning every cell
@@ -253,8 +263,8 @@ public class Board {
     }
 
     // English aliases
-    public void    reveal(int s, int u)  { ac(s, u); }
-    public boolean isGameOver()          { return isOyunBitti(); }
-    public boolean isWon()               { return kazanildiMi(); }
-    public Cell    getCell(int s, int u) { return getHucre(s, u); }
+    public void    revealClassic(int s, int u) { acKlasik(s, u); }
+    public boolean isGameOver()                { return isOyunBitti(); }
+    public boolean isWon()                     { return kazanildiMi(); }
+    public Cell    getCell(int s, int u)       { return getHucre(s, u); }
 }

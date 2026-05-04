@@ -1,24 +1,36 @@
 /**
  * Leblebi Modu seviye tanımları.
+ *
+ * FIX (quality): Fields are now private final with public getters.
+ * Although the fields were already declared final (preventing reassignment),
+ * keeping them public exposes implementation details and breaks encapsulation.
+ * Callers that previously accessed seviye.isim now use seviye.getIsim(), etc.
  */
 public class Seviye {
 
-    public final int numara;
-    public final String isim;
-    public final int satirSayisi;
-    public final int sutunSayisi;
-    public final int solucanSayisi;
-    public final int sureSaniye;
+    private final int    numara;
+    private final String isim;
+    private final int    satirSayisi;
+    private final int    sutunSayisi;
+    private final int    solucanSayisi;
+    private final int    sureSaniye;
 
     public Seviye(int numara, String isim, int satirSayisi, int sutunSayisi,
                   int solucanSayisi, int sureSaniye) {
-        this.numara       = numara;
-        this.isim         = isim;
-        this.satirSayisi  = satirSayisi;
-        this.sutunSayisi  = sutunSayisi;
+        this.numara        = numara;
+        this.isim          = isim;
+        this.satirSayisi   = satirSayisi;
+        this.sutunSayisi   = sutunSayisi;
         this.solucanSayisi = solucanSayisi;
-        this.sureSaniye   = sureSaniye;
+        this.sureSaniye    = sureSaniye;
     }
+
+    public int    getNumara()        { return numara; }
+    public String getIsim()          { return isim; }
+    public int    getSatirSayisi()   { return satirSayisi; }
+    public int    getSutunSayisi()   { return sutunSayisi; }
+    public int    getSolucanSayisi() { return solucanSayisi; }
+    public int    getSureSaniye()    { return sureSaniye; }
 
     // ── Seviye listesi ───────────────────────────────────────────────────────
 

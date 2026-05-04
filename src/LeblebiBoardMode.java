@@ -45,6 +45,9 @@ public class LeblebiBoardMode {
      * Returns true if a mine was hit (caller can trigger visual/sound feedback).
      * The board does NOT end the game on mine hit; instead a life is deducted here
      * and the mine is removed so the player can continue from the same cell.
+     *
+     * FIX (quality): kazanmaKontrol() is now called here so the win state is always
+     * updated after every open — callers no longer need to remember to do it.
      */
     public boolean hucreAc(int satir, int sutun) {
         if (oyunBitti || kazanildi) return false;
@@ -69,32 +72,30 @@ public class LeblebiBoardMode {
             kargayiTemizle();
         }
 
+        // Always check win condition after a successful open
+        kazanmaKontrol();
+
         return mineHit;
-    }
-
-    // ── Can sistemi ──────────────────────────────────────────────────────────
-
-    /** @deprecated Use hucreAc() instead — it manages lives automatically. */
-    @Deprecated
-    public void solucanaBastir() {
-        if (oyunBitti) return;
-        canSayisi--;
-        if (canSayisi <= 0) {
-            canSayisi = 0;
-            oyunBitti = true;
-            kazanildi = false;
-        }
     }
 
     // ── Süre sistemi ─────────────────────────────────────────────────────────
 
-    public void sureyiGuncelle(int gecenSaniye) {
-        if (oyunBitti || kazanildi) return;
+    /**
+     * Updates the countdown timer by the given number of elapsed seconds.
+     *
+     * FIX (quality): Now returns true if the timer hit zero this tick (game just
+     * ended due to timeout), so callers can react immediately without polling
+     * isOyunBitti() separately. Returning false means nothing changed.
+     */
+    public boolean sureyiGuncelle(int gecenSaniye) {
+        if (oyunBitti || kazanildi) return false;
         kalanSure = Math.max(0, kalanSure - gecenSaniye);
         if (kalanSure <= 0) {
             oyunBitti = true;
             kazanildi = false;
+            return true;  // game just ended — notify caller
         }
+        return false;
     }
 
     // ── Puan sistemi ─────────────────────────────────────────────────────────
@@ -157,6 +158,11 @@ public class LeblebiBoardMode {
 
     // ── Kazanma kontrolü ────────────────────────────────────────────────────
 
+    /**
+     * Checks whether the board is fully cleared and sets the win flag if so.
+     * Called internally by hucreAc() after every safe open; may also be called
+     * externally (e.g. from the UI's arayuzuGuncelle loop) without side effects.
+     */
     public boolean kazanmaKontrol() {
         if (oyunBitti || kalanSure <= 0) return false;
         if (tahta.kazanildiMi()) {

@@ -4,6 +4,12 @@ public class Cell {
     private boolean isaretlendi;
     private int komsuMayinSayisi;
 
+    /**
+     * Returned by ac() so callers can distinguish between
+     * a successful open, a flag-blocked open, and a no-op on an already-open cell.
+     */
+    public enum OpenResult { OPENED, BLOCKED_BY_FLAG, ALREADY_OPEN }
+
     public Cell() {
         this.mayinMi = false;
         this.acildiMi = false;
@@ -19,8 +25,16 @@ public class Cell {
     public void setMayin(boolean mayinMi)            { this.mayinMi = mayinMi; }
     public void setKomsuMayinSayisi(int sayi)        { this.komsuMayinSayisi = sayi; }
 
-    public void ac() {
-        if (!isaretlendi) this.acildiMi = true;
+    /**
+     * Attempts to open the cell.
+     * Returns OPENED on success, BLOCKED_BY_FLAG if flagged, ALREADY_OPEN if already revealed.
+     * Callers that don't need the result can safely ignore the return value.
+     */
+    public OpenResult ac() {
+        if (acildiMi)    return OpenResult.ALREADY_OPEN;
+        if (isaretlendi) return OpenResult.BLOCKED_BY_FLAG;
+        this.acildiMi = true;
+        return OpenResult.OPENED;
     }
 
     /** Closes a previously opened cell (used by the lives-recovery path). */
@@ -35,11 +49,11 @@ public class Cell {
     public boolean bosHucreMi() { return komsuMayinSayisi == 0 && !mayinMi; }
 
     // English aliases
-    public boolean isMine()         { return mayinMi; }
-    public boolean isRevealed()     { return acildiMi; }
-    public boolean isFlagged()      { return isaretlendi; }
-    public int     getNeighborMines(){ return komsuMayinSayisi; }
-    public void    reveal()         { ac(); }
-    public void    toggleFlag()     { isaretiDegistir(); }
-    public boolean isEmpty()        { return bosHucreMi(); }
+    public boolean   isMine()          { return mayinMi; }
+    public boolean   isRevealed()      { return acildiMi; }
+    public boolean   isFlagged()       { return isaretlendi; }
+    public int       getNeighborMines(){ return komsuMayinSayisi; }
+    public OpenResult reveal()         { return ac(); }
+    public void      toggleFlag()      { isaretiDegistir(); }
+    public boolean   isEmpty()         { return bosHucreMi(); }
 }
