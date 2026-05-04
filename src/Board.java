@@ -30,19 +30,13 @@ public class Board {
     }
 
     /**
-     * FIX (quality): Expanded to protect the full 3×3 neighbourhood around the
-     * first click, not just the clicked cell. On small boards (e.g. 8×8 / 5 mines)
-     * this prevents mines from landing directly adjacent to the opening move.
-     * Also renamed: removed the double-i typo (guvenliiBolge → guvenliBolge).
+     * Returns a safe zone containing only the clicked cell.
+     * This guarantees the first click is never a mine, without
+     * artificially excluding its neighbours from mine placement.
      */
     private Set<Integer> guvenliBolgeHesapla(int satir, int sutun) {
         Set<Integer> guvenli = new HashSet<>();
-        for (int ds = -1; ds <= 1; ds++)
-            for (int du = -1; du <= 1; du++) {
-                int ys = satir + ds, yu = sutun + du;
-                if (sinirIcindeMi(ys, yu))
-                    guvenli.add(ys * sutunSayisi + yu);
-            }
+        guvenli.add(satir * sutunSayisi + sutun);
         return guvenli;
     }
 
