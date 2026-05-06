@@ -12,6 +12,8 @@ Standart Mayın Tarlası deneyimi. Bayrakları yerleştir, mayınlardan kaçın,
 - **Kronometreli mod:** Süren ölçülür ve skor tablosuna kaydedilir.
 
 ### 🫘 Leblebi Tarlası Modu
+> ⚠️ Bu mod varsayılan olarak gizlidir. Aşağıdaki easter egg bölümüne bak.
+
 Mehmet Emmi'nin yılan dolu leblebi tarlasını temizlediğin özel mod. Mayınlar = Yılanlar, Bayraklar = Çubuklar.
 
 **Özellikler:**
@@ -19,6 +21,16 @@ Mehmet Emmi'nin yılan dolu leblebi tarlasını temizlediğin özel mod. Mayınl
 - ⏳ Geri sayım süresi — Her bölümün sınırlı süresi var
 - 💰 Puan & Altın ayrımı — Altın bölümler arasında kalıcıdır
 - 🌟 Altın Leblebi — Gizli altın leblebiler +10 altın kazandırır
+
+---
+
+## 🥚 Easter Egg — Gizli Mod Nasıl Açılır?
+
+Ana menü açıkken klavyenden **`1837837`** yaz.
+
+Başka bir şeye tıklamana gerek yok — sadece menü açıkken bu rakamları sırayla bas. Kod doğruysa ekran sarsılır, altın bir parlamayla **"🫘 Mehmet Emmi'nin Leblebi Tarlası Modu Açıldı!"** mesajı belirir ve menüde gizli buton görünür hale gelir.
+
+> Bu kodu nereden buldun diye sorma. Mehmet Emmi bize fısıldadı.
 
 ---
 
@@ -44,7 +56,7 @@ Market itemleri **altınla** alınır. Altın bölümler arasında **kalıcıdı
 | ⏰ Emmi'nin Saati | 30 💰 | +30 saniye ekler |
 | 🧪 Zirai İlaç | 50 💰 | Bir alandaki yılanları yok eder |
 | ❤️ Ekstra Kalp | 100 💰 | +1 can ekler |
-| 🎕 Fener Genişlet | 15 💰 | Gece modunda fener yarıçapını artırır *(sadece gece bölümlerinde)* |
+| 🕯️ Fener Genişlet | 15 💰 | Gece modunda fener yarıçapını artırır *(sadece gece bölümlerinde)* |
 
 ### ⬆️ Item Upgrade Sistemi
 Aynı item ne kadar çok kullanılırsa o kadar güçlenir:
