@@ -35,9 +35,9 @@ public class Seviye {
     // ── Seviye listesi ───────────────────────────────────────────────────────
 
     public static final Seviye[] SEVIYELER = {
-        new Seviye(1, "Evin Arka Bahçesi",  8,  8,  5,  90),
-        new Seviye(2, "Ana Tarla",          10, 10, 11, 120),
-        new Seviye(3, "Bereketli Topraklar",15, 15, 25, 180),
+        new Seviye(1, "Evin Arka Bahçesi",   8,  8,  9, 120),
+        new Seviye(2, "Ana Tarla",           10, 10, 15, 180),
+        new Seviye(3, "Bereketli Topraklar", 15, 15, 35, 240),
     };
 
     public static Seviye getSeviye(int numara) {

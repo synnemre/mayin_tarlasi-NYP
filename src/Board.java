@@ -30,13 +30,22 @@ public class Board {
     }
 
     /**
-     * Returns a safe zone containing only the clicked cell.
-     * This guarantees the first click is never a mine, without
-     * artificially excluding its neighbours from mine placement.
+     * Returns the standard 3x3 safe zone around the first click.
+     * No mine can be placed in this area, so the clicked cell is always
+     * a 0-neighbour cell and the flood-fill produces a reasonable opening —
+     * not an enormous cascade across the whole board.
+     *
+     * This matches the behaviour of the original Windows Minesweeper and
+     * virtually all modern implementations.
      */
     private Set<Integer> guvenliBolgeHesapla(int satir, int sutun) {
         Set<Integer> guvenli = new HashSet<>();
-        guvenli.add(satir * sutunSayisi + sutun);
+        for (int ds = -1; ds <= 1; ds++)
+            for (int du = -1; du <= 1; du++) {
+                int ys = satir + ds, yu = sutun + du;
+                if (sinirIcindeMi(ys, yu))
+                    guvenli.add(ys * sutunSayisi + yu);
+            }
         return guvenli;
     }
 
@@ -53,6 +62,21 @@ public class Board {
         }
         // After placing mines, recalculate closed safe cell count
         kapaliGuvenliHucre = satirSayisi * sutunSayisi - toplamMayin;
+    }
+
+    public void altinLeblebileriYerlestir(int adet) {
+        java.util.List<Cell> guvenliHucreler = new java.util.ArrayList<>();
+        for (int s = 0; s < satirSayisi; s++) {
+            for (int u = 0; u < sutunSayisi; u++) {
+                if (!izgara[s][u].isMayinMi()) {
+                    guvenliHucreler.add(izgara[s][u]);
+                }
+            }
+        }
+        java.util.Collections.shuffle(guvenliHucreler, new SecureRandom());
+        for (int i = 0; i < Math.min(adet, guvenliHucreler.size()); i++) {
+            guvenliHucreler.get(i).setAltinLeblebiMi(true);
+        }
     }
 
     private void komsuMayinlariHesapla() {
@@ -132,6 +156,35 @@ public class Board {
     }
 
     /**
+     * Leblebi moduna özel: tek hücre açar, flood-fill YAPMAZ.
+     * Böylece boş bölgelerde yüz hücre birden açılmaz;
+     * oyuncu her hücreyi bizzat tıklamak zorunda kalır.
+     * Returns true if a mine was hit (aynı ac() sözleşmesi).
+     */
+    public boolean acTekHucre(int satir, int sutun, boolean useLives) {
+        if (oyunBitti) return false;
+        if (!sinirIcindeMi(satir, sutun)) return false;
+
+        ilkTiklamaKontrol(satir, sutun);
+
+        Cell hucre = izgara[satir][sutun];
+        if (hucre.isAcildiMi() || hucre.isIsaretlendi()) return false;
+        hucre.ac();
+
+        if (hucre.isMayinMi()) {
+            if (!useLives) {
+                oyunBitti = true;
+                tumMayinlariGoster();
+            }
+            return true;
+        }
+
+        kapaliGuvenliHucre = Math.max(0, kapaliGuvenliHucre - 1);
+        // flood-fill YOK — sadece bu hücre açılır
+        return false;
+    }
+
+    /**
      * Called by the lives system after a mine hit:
      * removes the mine from the board so play can continue,
      * recalculates neighbour counts, and re-opens the cell safely.
@@ -146,6 +199,7 @@ public class Board {
             toplamMayin--;
             // Close the cell so it can be safely re-opened
             hucre.kapat();
+            kapaliGuvenliHucre++; // BUG 1 FIX: mine kaldırıldı, hücre güvenli+kapalı oldu, sayaç artırılmalı.
 
             // Redistribute: place 1 new mine somewhere that is closed, not this cell, not a mine
             Set<Integer> guvenli = new HashSet<>();
@@ -165,10 +219,10 @@ public class Board {
                 int[] c = candidates.get(new SecureRandom().nextInt(candidates.size()));
                 izgara[c[0]][c[1]].setMayin(true);
                 toplamMayin++;
+                kapaliGuvenliHucre--; // The new mine replaced a safe closed cell.
             }
             // Note: if no candidate found (board nearly complete), toplamMayin stays decremented.
-            // kapaliGuvenliHucre is still > 0 because the hit cell was just reopened via ac(),
-            // so kazanildiMi() won't fire spuriously.
+            // kapaliGuvenliHucre is correctly incremented because the hit cell was just made safe.
 
             komsuMayinlariHesapla();
             // Open it again — now it's safe
@@ -185,50 +239,90 @@ public class Board {
      * This means all decrement logic lives in one place (Board.ac), so future
      * changes to the open path cannot accidentally desync the counter.
      */
-    public int zirayiIlacUygula(int satir, int sutun) {
+    public int zirayiIlacUygula(int satir, int sutun, int cap) {
         if (!sinirIcindeMi(satir, sutun)) return 0;
 
         ilkTiklamaKontrol(satir, sutun);
 
         int yokEdilenSolucan = 0;
 
-        // 1. Remove mines in the 3x3 area
-        for (int ds = -1; ds <= 1; ds++)
-            for (int du = -1; du <= 1; du++) {
-                int ys = satir + ds, yu = sutun + du;
-                if (sinirIcindeMi(ys, yu) && izgara[ys][yu].isMayinMi()) {
-                    izgara[ys][yu].setMayin(false);
-                    toplamMayin--;
-                    yokEdilenSolucan++;
+        java.util.List<int[]> etkiAlani = new java.util.ArrayList<>();
+        if (cap == 100) {
+            // Level 3: Cross clear
+            for (int s = 0; s < satirSayisi; s++) etkiAlani.add(new int[]{s, sutun});
+            for (int u = 0; u < sutunSayisi; u++) {
+                if (u != sutun) etkiAlani.add(new int[]{satir, u});
+            }
+        } else {
+            // Level 1 (cap=1: 3x3) or Level 2 (cap=2: 5x5)
+            for (int ds = -cap; ds <= cap; ds++) {
+                for (int du = -cap; du <= cap; du++) {
+                    etkiAlani.add(new int[]{satir + ds, sutun + du});
                 }
             }
+        }
+
+        // 1. Remove mines in the area
+        for (int[] pos : etkiAlani) {
+            int ys = pos[0], yu = pos[1];
+            if (sinirIcindeMi(ys, yu) && izgara[ys][yu].isMayinMi()) {
+                izgara[ys][yu].setMayin(false);
+                toplamMayin--;
+                yokEdilenSolucan++;
+                kapaliGuvenliHucre++; // We destroyed a mine, so it became a safe closed cell.
+            }
+        }
 
         // 2. Recalculate neighbour counts for the whole board
         komsuMayinlariHesapla();
 
-        // 3. Open all cells in the 3x3 area via Board.ac() so kapaliGuvenliHucre
-        //    is maintained in a single place, and empty-cell flood-fill is automatic.
-        for (int ds = -1; ds <= 1; ds++)
-            for (int du = -1; du <= 1; du++) {
-                int ys = satir + ds, yu = sutun + du;
-                if (sinirIcindeMi(ys, yu))
-                    ac(ys, yu, true);
-            }
+        // 3. Open all cells in the area via Board.ac()
+        for (int[] pos : etkiAlani) {
+            int ys = pos[0], yu = pos[1];
+            if (sinirIcindeMi(ys, yu))
+                ac(ys, yu, true);
+        }
 
         return yokEdilenSolucan;
     }
 
     /**
-     * Karga: returns a random unrevealed mine's coordinates, or null.
+     * Karga Upgrade (Level 1: 1 random, Level 2: 3 random, Level 3: closest)
      */
-    public int[] rastgeleMayinBul() {
+    public java.util.List<int[]> kargaGorus(int level, int lastR, int lastC) {
         java.util.List<int[]> mayinlar = new java.util.ArrayList<>();
-        for (int s = 0; s < satirSayisi; s++)
-            for (int u = 0; u < sutunSayisi; u++)
-                if (izgara[s][u].isMayinMi() && !izgara[s][u].isAcildiMi())
+        for (int s = 0; s < satirSayisi; s++) {
+            for (int u = 0; u < sutunSayisi; u++) {
+                if (izgara[s][u].isMayinMi() && !izgara[s][u].isAcildiMi()) {
                     mayinlar.add(new int[]{s, u});
-        if (mayinlar.isEmpty()) return null;
-        return mayinlar.get(new SecureRandom().nextInt(mayinlar.size()));
+                }
+            }
+        }
+        if (mayinlar.isEmpty()) return mayinlar;
+
+        java.util.List<int[]> sonuc = new java.util.ArrayList<>();
+        if (level == 3) {
+            // En yakın olanı bul
+            int[] enYakin = mayinlar.get(0);
+            double minMesafe = Double.MAX_VALUE;
+            for (int[] m : mayinlar) {
+                double mesafe = Math.pow(m[0] - lastR, 2) + Math.pow(m[1] - lastC, 2);
+                if (mesafe < minMesafe) {
+                    minMesafe = mesafe;
+                    enYakin = m;
+                }
+            }
+            sonuc.add(enYakin);
+            return sonuc;
+        }
+
+        // Level 1 (1 tane) veya Level 2 (3 tane)
+        java.util.Collections.shuffle(mayinlar, new SecureRandom());
+        int adet = (level == 2) ? 3 : 1;
+        for (int i = 0; i < Math.min(adet, mayinlar.size()); i++) {
+            sonuc.add(mayinlar.get(i));
+        }
+        return sonuc;
     }
 
     // FIX (minor): Removed the one-line tumMayinlariAc() wrapper — callers now
@@ -247,6 +341,7 @@ public class Board {
 
     public Cell    getHucre(int s, int u) { return izgara[s][u]; }
     public boolean isOyunBitti()          { return oyunBitti; }
+    public boolean isIlkTiklama()         { return ilkTiklama; }
     public int     getSatirSayisi()       { return satirSayisi; }
     public int     getSutunSayisi()       { return sutunSayisi; }
     public int     getToplamMayin()       { return toplamMayin; }
