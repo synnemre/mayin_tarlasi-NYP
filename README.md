@@ -1,12 +1,6 @@
-# 🫘 Mayın Tarlası — Leblebi Tarlası
+# 🫘 Mayın Tarlası — Leblebi Tarlası Modu
 
-> Mehmet Emmi'nin leblebi tarlasını yılanlardan temizle! Klasik Mayın Tarlası oyununun Türkçe, köy-temalı ve çok katmanlı indie yorumu.
-
----
-
-## 📸 Ekran Görüntüleri
-
-> Oyunu çalıştırıp bir ekran görüntüsü ekleyebilirsin buraya.
+> Mayın Tarlası oyununun Türkçe, köy-temalı ve çok katmanlı indie yorumu. Mehmet Emmi'nin leblebi tarlasını yılanlardan temizle! Klasik 
 
 ---
 
