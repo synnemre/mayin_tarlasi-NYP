@@ -3,6 +3,7 @@ public class Cell {
     private boolean acildiMi;
     private boolean isaretlendi;
     private int komsuMayinSayisi;
+    private boolean altinLeblebiMi;
 
     /**
      * Returned by ac() so callers can distinguish between
@@ -15,15 +16,18 @@ public class Cell {
         this.acildiMi = false;
         this.isaretlendi = false;
         this.komsuMayinSayisi = 0;
+        this.altinLeblebiMi = false;
     }
 
     public boolean isMayinMi()          { return mayinMi; }
     public boolean isAcildiMi()         { return acildiMi; }
     public boolean isIsaretlendi()      { return isaretlendi; }
     public int     getKomsuMayinSayisi(){ return komsuMayinSayisi; }
+    public boolean isAltinLeblebiMi()   { return altinLeblebiMi; }
 
     public void setMayin(boolean mayinMi)            { this.mayinMi = mayinMi; }
     public void setKomsuMayinSayisi(int sayi)        { this.komsuMayinSayisi = sayi; }
+    public void setAltinLeblebiMi(boolean altinLeblebiMi) { this.altinLeblebiMi = altinLeblebiMi; }
 
     /**
      * Attempts to open the cell.
@@ -56,4 +60,5 @@ public class Cell {
     public OpenResult reveal()         { return ac(); }
     public void      toggleFlag()      { isaretiDegistir(); }
     public boolean   isEmpty()         { return bosHucreMi(); }
+    public boolean   isGoldenLeblebi() { return altinLeblebiMi; }
 }
