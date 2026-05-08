@@ -259,13 +259,6 @@ public class MinesweeperApp extends Application {
         baslik.setAlignment(javafx.geometry.Pos.CENTER);
         baslik.setPadding(new Insets(48, 0, 8, 0));
 
-        Label altYazi = new Label("💣  Mayın Tarlası Oyun Merkezi  💣");
-        altYazi.setStyle(
-            "-fx-font-size: 13px; -fx-text-fill: #6058a0;" +
-            "-fx-letter-spacing: 2px;");
-        altYazi.setAlignment(javafx.geometry.Pos.CENTER);
-        altYazi.setMaxWidth(Double.MAX_VALUE);
-        altYazi.setPadding(new Insets(0, 0, 40, 0));
 
         // ── 3 üst kare buton ──────────────────────────────────────────────────
         Button klasikBtn  = kareMenuButon("⛏", "Klasik\nMayın Tarlası", "#7eb8ff", "#1a1838");
@@ -276,9 +269,6 @@ public class MinesweeperApp extends Application {
         satranBtn.setOnAction(e -> { sesCal(sesButon); leblebModu = false; satranModu = true;  satranOyunuBaslat(); });
         skorBtn.setOnAction(e   -> { sesCal(sesButon); skorTablosunuGoster(); });
 
-        HBox ustSira = new HBox(20, klasikBtn, satranBtn, skorBtn);
-        ustSira.setAlignment(Pos.CENTER);
-        ustSira.setPadding(new Insets(0, 40, 16, 40));
 
         // ── Alt merkez kare buton (Leblebi — gizli) ───────────────────────────
         Button leblebBtn = kareMenuButon("🫘", "Mehmet Emmi'nin\nLeblebi Tarlası", "#e8b840", "#251200");
@@ -293,8 +283,11 @@ public class MinesweeperApp extends Application {
             fenerBaseYaricap = 165;
             leblebOyunuBaslat();
         });
+        HBox ustSira = new HBox(20, klasikBtn, satranBtn, leblebBtn);
+        ustSira.setAlignment(Pos.CENTER);
+        ustSira.setPadding(new Insets(0, 40, 16, 40));
 
-        HBox altSira = new HBox(leblebBtn);
+        HBox altSira = new HBox(skorBtn);
         altSira.setAlignment(Pos.CENTER);
         altSira.setPadding(new Insets(0, 40, 40, 40));
 
@@ -304,7 +297,7 @@ public class MinesweeperApp extends Application {
         easterEggEtiketi.setAlignment(Pos.CENTER);
         easterEggEtiketi.setMaxWidth(Double.MAX_VALUE);
 
-        kok.getChildren().addAll(baslik, altYazi, ustSira, altSira, easterEggEtiketi);
+        kok.getChildren().addAll(baslik, ustSira, altSira, easterEggEtiketi);
 
         StackPane kokDuzenleyici = new StackPane(kok);
         kokDuzenleyici.setId("menuRoot");
@@ -382,23 +375,7 @@ public class MinesweeperApp extends Application {
         return btn;
     }
 
-    /** Eski düz menü butonu — dialog ve diğer yerler için */
-    private Button menuButonOlustur(String metin, String arkaplan, String yaziRengi) {
-        Button btn = new Button(metin);
-        btn.setPrefWidth(340);
-        btn.setPrefHeight(50);
-        btn.setStyle(
-                "-fx-background-color: " + arkaplan + ";" +
-                "-fx-text-fill: " + yaziRengi + ";" +
-                "-fx-font-size: 15px; -fx-font-weight: bold;" +
-                "-fx-background-radius: 10; -fx-cursor: hand;" +
-                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 8, 0, 0, 2);");
-        btn.setOnMouseEntered(e -> btn.setOpacity(0.85));
-        btn.setOnMouseExited(e  -> btn.setOpacity(1.0));
-        return btn;
-    }
-
-    // ── Easter Egg ────────────────────────────────────────────────────────────
+       // ── Easter Egg ────────────────────────────────────────────────────────────
 
     private void easterEggTetikle(VBox kok, Button leblebBtn, Label etiket) {
         TranslateTransition sarsinti = new TranslateTransition(Duration.millis(60), kok);
