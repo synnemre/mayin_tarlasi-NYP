@@ -30,54 +30,57 @@ public class MinesweeperApp extends Application {
     private static final int KLASIK_CAN = 3;
 
     // ── Theme colours ─────────────────────────────────────────────────────────
-    private static final String KT_ARKAPLAN  = "#1e1e2e";
-    private static final String KT_ACILMAMIS = "#454158";
-    private static final String KT_ACILMIS   = "#11111b";
-    private static final String KT_ISARETLI  = "#524f6e";
-    private static final String KT_CERCEVE   = "#6c7086";
-    private static final String KT_YAZI      = "#cdd6f4";
-    private static final String KT_YAZI_SOLUK= "#6c7086";
-    private static final String KT_UST_BAR   = "#181825";
+    // Karanlık tema — Midnight Indigo
+    private static final String KT_ARKAPLAN  = "#12111f";
+    private static final String KT_ACILMAMIS = "#3b3756";
+    private static final String KT_ACILMIS   = "#0a0918";
+    private static final String KT_ISARETLI  = "#4e3d7a";
+    private static final String KT_CERCEVE   = "#5a5478";
+    private static final String KT_YAZI      = "#e2dcf8";
+    private static final String KT_YAZI_SOLUK= "#7b748a";
+    private static final String KT_UST_BAR   = "#0e0d1c";
 
-    private static final String AT_ARKAPLAN  = "#e8eaf0";
-    private static final String AT_ACILMAMIS = "#c0c8d8";
-    private static final String AT_ACILMIS   = "#f4f4f4";
-    private static final String AT_ISARETLI  = "#b0b8cc";
-    private static final String AT_CERCEVE   = "#9aa0b0";
-    private static final String AT_YAZI      = "#1e1e2e";
-    private static final String AT_YAZI_SOLUK= "#9aa0b0";
-    private static final String AT_UST_BAR   = "#d0d4de";
+    // Açık tema — Soft Lavender
+    private static final String AT_ARKAPLAN  = "#eef0f8";
+    private static final String AT_ACILMAMIS = "#b8bcd8";
+    private static final String AT_ACILMIS   = "#f5f5fc";
+    private static final String AT_ISARETLI  = "#a8aed0";
+    private static final String AT_CERCEVE   = "#8890b0";
+    private static final String AT_YAZI      = "#1a1830";
+    private static final String AT_YAZI_SOLUK= "#8890b0";
+    private static final String AT_UST_BAR   = "#d4d8ee";
 
-    private static final String LB_ARKAPLAN  = "#3d2800";
-    private static final String LB_ACILMAMIS = "#c89a2a";
-    private static final String LB_ACILMIS   = "#7a4e1a";
-    private static final String LB_ISARETLI  = "#e8b84b";
-    private static final String LB_YILAN_RENK= "#4a7c2f";
-    private static final String LB_CERCEVE   = "#a07020";
-    private static final String LB_UST_BAR   = "linear-gradient(to bottom, #7a4e1a, #4a2e00)";
+    // Leblebi tema — Golden Harvest
+    private static final String LB_ARKAPLAN  = "#2e1a00";
+    private static final String LB_ACILMAMIS = "#c8922a";
+    private static final String LB_ACILMIS   = "#6b3e10";
+    private static final String LB_ISARETLI  = "#e8b840";
+    private static final String LB_YILAN_RENK= "#3a6e25";
+    private static final String LB_CERCEVE   = "#8c6018";
+    private static final String LB_UST_BAR   = "linear-gradient(to bottom, #6b3e10, #3a1e00)";
     private static final String LB_KARGA_RENK= "#c0392b";
 
-    // ── Satranç modu renkleri ─────────────────────────────────────────────────
-    private static final String CH_ARKAPLAN  = "#0d1b2a";
-    private static final String CH_ACILMAMIS_LIGHT = "#ffffff";
-    private static final String CH_ACILMAMIS_DARK  = "#000000";
-    private static final String CH_ACILMIS   = "#0f3460";
-    private static final String CH_CERCEVE   = "#1a4a7a";
-    private static final String CH_UST_BAR   = "#081428";
-    private static final String CH_ISARETLI  = "#4a2060";
+    // ── Satranç modu renkleri — Ivory & Obsidian ─────────────────────────────
+    private static final String CH_ARKAPLAN  = "#0a1628";
+    private static final String CH_ACILMAMIS_LIGHT = "#f0ead8";  // Fildişi
+    private static final String CH_ACILMAMIS_DARK  = "#2c1f0e";  // Koyu kahve
+    private static final String CH_ACILMIS   = "#0d2e54";
+    private static final String CH_CERCEVE   = "#1e3a5f";
+    private static final String CH_UST_BAR   = "#060e1e";
+    private static final String CH_ISARETLI  = "#3d1a5a";
 
     private static final String[] KT_SAYI_RENK = {
-            "", "#89b4fa", "#a6e3a1", "#f38ba8", "#74c7ec",
-            "#fab387", "#89dceb", "#b4befe", "#cdd6f4" };
+            "", "#7eb8ff", "#98e0a0", "#ff8080", "#60c8ec",
+            "#ffaa70", "#70d8eb", "#c0a8ff", "#e2dcf8" };
     private static final String[] AT_SAYI_RENK = {
-            "", "#1565c0", "#2e7d32", "#c62828", "#0277bd",
-            "#e65100", "#00838f", "#6a1b9a", "#37474f" };
+            "", "#1a56b0", "#276830", "#b82020", "#0060a0",
+            "#c85000", "#007880", "#5a1090", "#304050" };
     private static final String[] LB_SAYI_RENK = {
             "", "#e8c27a", "#6dbe45", "#d95f3b", "#5ba3d6",
             "#d4a050", "#40d4b0", "#c080e0", "#f0c060" };
     private static final String[] CH_SAYI_RENK = {
-            "", "#4fc3f7", "#81c784", "#e57373", "#ce93d8",
-            "#ffb74d", "#4dd0e1", "#f48fb1", "#b0bec5" };
+            "", "#5bc8f8", "#7eca80", "#f07070", "#d090e0",
+            "#ffc060", "#40d8e8", "#f080b8", "#a8b8c8" };
 
     // ── Application state ─────────────────────────────────────────────────────
     private Stage  pencere;
@@ -176,9 +179,10 @@ public class MinesweeperApp extends Application {
         this.pencere = pencere;
         menuGoster();
         pencere.setTitle("Mayın Tarlası");
-        pencere.setMinWidth(500);
-        pencere.setMinHeight(400);
+        pencere.setMinWidth(560);
+        pencere.setMinHeight(500);
         pencere.setResizable(true);
+        pencere.centerOnScreen();
         pencere.show();
 
         Thread yukleyici = new Thread(() -> {
@@ -231,38 +235,46 @@ public class MinesweeperApp extends Application {
     // =========================================================================
 
     private void menuGoster() {
-        VBox kok = new VBox(24);
+        // ── Arka plan ve gradient ──────────────────────────────────────────────
+        VBox kok = new VBox(0);
         kok.setAlignment(Pos.CENTER);
-        kok.setPadding(new Insets(60));
-        kok.setStyle("-fx-background-color: " + KT_ARKAPLAN + ";");
+        kok.setStyle(
+            "-fx-background-color: linear-gradient(to bottom, #0a0918 0%, #12111f 60%, #0e0d1c 100%);");
 
-        Label baslik = new Label("💣 MAYIN TARLASI");
+        // ── Başlık (Constantine benzeri büyük yazı) ────────────────────────────
+        Label baslik = new Label("MAYIN TARLASI");
         baslik.setStyle(
-                "-fx-font-size: 36px; -fx-font-weight: bold;" +
-                "-fx-text-fill: #cdd6f4; -fx-effect: dropshadow(gaussian,#89b4fa,12,0.4,0,0);");
+            "-fx-font-family: 'Constantine', 'Palatino Linotype', 'Book Antiqua', serif;" +
+            "-fx-font-size: 52px; -fx-font-weight: bold;" +
+            "-fx-text-fill: linear-gradient(to bottom, #e8dff8, #a090d0);" +
+            "-fx-effect: dropshadow(gaussian, #7060c0, 20, 0.5, 0, 3);");
         baslik.setMaxWidth(Double.MAX_VALUE);
         baslik.setAlignment(javafx.geometry.Pos.CENTER);
+        baslik.setPadding(new Insets(48, 0, 8, 0));
 
-        Button klasikBtn = menuButonOlustur("⛏  Klasik Mayın Tarlası Oyna", "#89b4fa", "#1e1e2e");
-        klasikBtn.setOnAction(e -> {
-            sesCal(sesButon);
-            leblebModu = false; satranModu = false;
-            klasikOyunuBaslat();
-        });
+        Label altYazi = new Label("💣  Mayın Tarlası Oyun Merkezi  💣");
+        altYazi.setStyle(
+            "-fx-font-size: 13px; -fx-text-fill: #6058a0;" +
+            "-fx-letter-spacing: 2px;");
+        altYazi.setAlignment(javafx.geometry.Pos.CENTER);
+        altYazi.setMaxWidth(Double.MAX_VALUE);
+        altYazi.setPadding(new Insets(0, 0, 40, 0));
 
-        // ── YENİ: Satranç Modu butonu ─────────────────────────────────────
-        Button satranBtn = menuButonOlustur("♟  Satranç Mayın Tarlası", "#f0c040", "#1a1a2e");
-        satranBtn.setOnAction(e -> {
-            sesCal(sesButon);
-            leblebModu = false; satranModu = true;
-            satranOyunuBaslat();
-        });
-        // ──────────────────────────────────────────────────────────────────
+        // ── 3 üst kare buton ──────────────────────────────────────────────────
+        Button klasikBtn  = kareMenuButon("⛏", "Klasik\nMayın Tarlası", "#7eb8ff", "#1a1838");
+        Button satranBtn  = kareMenuButon("♟", "Satranç\nMayın Tarlası", "#f0c040", "#1a1608");
+        Button skorBtn    = kareMenuButon("🏆", "Skor\nTablosu",        "#7eda90", "#081808");
 
-        Button skorBtn = menuButonOlustur("🏆  Skor Tablosu", "#a6e3a1", "#1e1e2e");
-        skorBtn.setOnAction(e -> { sesCal(sesButon); skorTablosunuGoster(); });
+        klasikBtn.setOnAction(e -> { sesCal(sesButon); leblebModu = false; satranModu = false; klasikOyunuBaslat(); });
+        satranBtn.setOnAction(e -> { sesCal(sesButon); leblebModu = false; satranModu = true;  satranOyunuBaslat(); });
+        skorBtn.setOnAction(e   -> { sesCal(sesButon); skorTablosunuGoster(); });
 
-        Button leblebBtn = menuButonOlustur("🫘  Mehmet Emmi'nin Leblebi Tarlası", "#c89a2a", "#3d2800");
+        HBox ustSira = new HBox(20, klasikBtn, satranBtn, skorBtn);
+        ustSira.setAlignment(Pos.CENTER);
+        ustSira.setPadding(new Insets(0, 40, 16, 40));
+
+        // ── Alt merkez kare buton (Leblebi — gizli) ───────────────────────────
+        Button leblebBtn = kareMenuButon("🫘", "Mehmet Emmi'nin\nLeblebi Tarlası", "#e8b840", "#251200");
         leblebBtn.setVisible(leblebAcildi);
         leblebBtn.setManaged(leblebAcildi);
         leblebBtn.setId("leblebBtn");
@@ -275,16 +287,22 @@ public class MinesweeperApp extends Application {
             leblebOyunuBaslat();
         });
 
+        HBox altSira = new HBox(leblebBtn);
+        altSira.setAlignment(Pos.CENTER);
+        altSira.setPadding(new Insets(0, 40, 40, 40));
+
         Label easterEggEtiketi = new Label(leblebAcildi ? "🫘 Mehmet Emmi'nin Leblebi Tarlası Modu Açık!" : "");
         easterEggEtiketi.setId("easterEggEtiket");
         easterEggEtiketi.setStyle("-fx-font-size: 13px; -fx-text-fill: #c89a2a; -fx-font-weight: bold;");
+        easterEggEtiketi.setAlignment(Pos.CENTER);
+        easterEggEtiketi.setMaxWidth(Double.MAX_VALUE);
 
-        kok.getChildren().addAll(baslik, klasikBtn, satranBtn, skorBtn, leblebBtn, easterEggEtiketi);
+        kok.getChildren().addAll(baslik, altYazi, ustSira, altSira, easterEggEtiketi);
 
         StackPane kokDuzenleyici = new StackPane(kok);
         kokDuzenleyici.setId("menuRoot");
 
-        menuSahne = new Scene(kokDuzenleyici, 600, 540);
+        menuSahne = new Scene(kokDuzenleyici, 660, 580);
         menuSahne.setOnKeyPressed(olay -> {
             if (leblebAcildi) return;
             String k = olay.getText();
@@ -302,8 +320,63 @@ public class MinesweeperApp extends Application {
 
         globalCssUygula(menuSahne);
         pencere.setScene(menuSahne);
+        pencere.sizeToScene();
     }
 
+    /** Kare menü butonu — ikon + iki satır yazı */
+    private Button kareMenuButon(String ikon, String etiket, String vurguRenk, String yazıArka) {
+        Label ikonLbl = new Label(ikon);
+        ikonLbl.setStyle("-fx-font-size: 36px;");
+
+        Label etiketLbl = new Label(etiket);
+        etiketLbl.setStyle(
+            "-fx-font-size: 13px; -fx-font-weight: bold;" +
+            "-fx-text-fill: " + vurguRenk + ";" +
+            "-fx-text-alignment: center;");
+        etiketLbl.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
+        etiketLbl.setWrapText(true);
+
+        VBox kutu = new VBox(8, ikonLbl, etiketLbl);
+        kutu.setAlignment(Pos.CENTER);
+
+        Button btn = new Button();
+        btn.setGraphic(kutu);
+        btn.setPrefSize(170, 150);
+        btn.setMinSize(150, 130);
+        btn.setStyle(
+            "-fx-background-color: linear-gradient(to bottom right, #1e1c34, #16142a);" +
+            "-fx-border-color: " + vurguRenk + ";" +
+            "-fx-border-width: 2;" +
+            "-fx-background-radius: 16; -fx-border-radius: 16;" +
+            "-fx-cursor: hand;" +
+            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 10, 0, 0, 4);");
+
+        ScaleTransition stIn  = new ScaleTransition(Duration.millis(140), btn); stIn.setToX(1.06);  stIn.setToY(1.06);
+        ScaleTransition stOut = new ScaleTransition(Duration.millis(140), btn); stOut.setToX(1.0); stOut.setToY(1.0);
+        btn.setOnMouseEntered(e -> {
+            btn.setStyle(
+                "-fx-background-color: linear-gradient(to bottom right, #2a2848, #1e1c38);" +
+                "-fx-border-color: " + vurguRenk + ";" +
+                "-fx-border-width: 2.5;" +
+                "-fx-background-radius: 16; -fx-border-radius: 16;" +
+                "-fx-cursor: hand;" +
+                "-fx-effect: dropshadow(gaussian, " + vurguRenk + ", 16, 0.4, 0, 0);");
+            stOut.stop(); stIn.play();
+        });
+        btn.setOnMouseExited(e -> {
+            btn.setStyle(
+                "-fx-background-color: linear-gradient(to bottom right, #1e1c34, #16142a);" +
+                "-fx-border-color: " + vurguRenk + ";" +
+                "-fx-border-width: 2;" +
+                "-fx-background-radius: 16; -fx-border-radius: 16;" +
+                "-fx-cursor: hand;" +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 10, 0, 0, 4);");
+            stIn.stop(); stOut.play();
+        });
+        return btn;
+    }
+
+    /** Eski düz menü butonu — dialog ve diğer yerler için */
     private Button menuButonOlustur(String metin, String arkaplan, String yaziRengi) {
         Button btn = new Button(metin);
         btn.setPrefWidth(340);
@@ -514,55 +587,127 @@ public class MinesweeperApp extends Application {
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.initOwner(pencere);
         dialog.setTitle("♟ Satranç Mayın Tarlası");
-        dialog.setResizable(false);
+        dialog.setResizable(true);
 
-        String arka = CH_ARKAPLAN, yazi = "#cdd6f4", vurgu = "#f0c040";
+        String arka = CH_ARKAPLAN, yazi = "#d0cce8", vurgu = "#f0c040", panel = "#0f2240";
 
-        Label baslik = new Label("♟ Satranç Mayın Tarlası");
-        baslik.setStyle("-fx-font-size:20px;-fx-font-weight:bold;-fx-text-fill:" + vurgu + ";");
+        // ── Başlık ─────────────────────────────────────────────────────────────
+        Label baslik = new Label("♟  SATRANÇ MAYIN TARLASI");
+        baslik.setStyle(
+            "-fx-font-family: 'Constantine', 'Palatino Linotype', serif;" +
+            "-fx-font-size:22px; -fx-font-weight:bold; -fx-text-fill:" + vurgu + ";" +
+            "-fx-effect: dropshadow(gaussian,#c09000,10,0.4,0,2);");
 
-        Label aciklama = new Label(
-            "Her hamlede taşlar hareket eder!\n" +
-            "Sayılar: o kareyi kaç taş tehdit ediyor.\n" +
-            "Tüm güvenli kareleri aç → kazandın!");
-        aciklama.setStyle("-fx-font-size:13px;-fx-text-fill:#95a5a6;");
-        aciklama.setWrapText(true);
+        Label altBaslik = new Label("Her hamlenin ardında taşlar hareket eder. Dikkatli ol!");
+        altBaslik.setStyle("-fx-font-size:12px; -fx-text-fill:#7a90b0; -fx-font-style:italic;");
 
-        Label zorlukBaslik = new Label("Zorluk Seç:");
-        zorlukBaslik.setStyle("-fx-font-size:14px;-fx-font-weight:bold;-fx-text-fill:" + vurgu + ";");
+        Separator sep0 = new Separator(); sep0.setStyle("-fx-background-color:#1e3a5f;");
+
+        // ── Nasıl Oynanır paneli ───────────────────────────────────────────────
+        VBox nasılPane = new VBox(8);
+        nasılPane.setPadding(new Insets(12));
+        nasılPane.setStyle(
+            "-fx-background-color:" + panel + ";" +
+            "-fx-border-color:#1e3a5f; -fx-border-radius:10; -fx-background-radius:10;");
+
+        Label nasılBaslik = new Label("📖  Nasıl Oynanır?");
+        nasılBaslik.setStyle("-fx-font-size:14px; -fx-font-weight:bold; -fx-text-fill:" + vurgu + ";");
+
+        String[][] kurallar = {
+            {"🖱 Sol Tık",    "Kareyi açar. Taşa basarsan oyun biter!"},
+            {"🚩 Sağ Tık",    "Şüpheli kareye bayrak diker / kaldırır."},
+            {"🔢 Rakamlar",   "O kareyi kaç taş tehdit ettiğini gösterir."},
+            {"⚡ Dinamik",    "Her güvenli açış sonrası tüm taşlar hareket eder!"},
+            {"🏆 Kazanmak",   "Tüm taşsız kareleri aç, bayraklar gerekmez."},
+            {"⏳ Süre",       "Süre dolmadan tahtayı temizlemelisin."},
+            {"🎯 Strateji",   "Sayıları dikkatlice okuyarak tehlikeli bölgeleri tespit et."},
+        };
+
+        GridPane kuralGrid = new GridPane();
+        kuralGrid.setHgap(10); kuralGrid.setVgap(6);
+        for (int i = 0; i < kurallar.length; i++) {
+            Label kl = new Label(kurallar[i][0]);
+            kl.setStyle("-fx-font-size:12px; -fx-font-weight:bold; -fx-text-fill:#f0c040; -fx-min-width:90;");
+            Label vl = new Label(kurallar[i][1]);
+            vl.setStyle("-fx-font-size:12px; -fx-text-fill:" + yazi + ";");
+            vl.setWrapText(true);
+            kuralGrid.add(kl, 0, i);
+            kuralGrid.add(vl, 1, i);
+        }
+        nasılPane.getChildren().addAll(nasılBaslik, kuralGrid);
+
+        // ── Taş hareketleri ───────────────────────────────────────────────────
+        VBox tasPane = new VBox(8);
+        tasPane.setPadding(new Insets(12));
+        tasPane.setStyle(
+            "-fx-background-color:" + panel + ";" +
+            "-fx-border-color:#1e3a5f; -fx-border-radius:10; -fx-background-radius:10;");
+
+        Label tasBaslik = new Label("♟  Taş Hareketleri");
+        tasBaslik.setStyle("-fx-font-size:14px; -fx-font-weight:bold; -fx-text-fill:" + vurgu + ";");
+
+        Object[][] taslar = {
+            {"♟ Piyon",  "1 adım aşağı hareket eder (yön: güney).",                "#a8d8a8"},
+            {"♞ At",     "L şeklinde atlar (2+1), engelleri aşar.",                "#a8c8f8"},
+            {"♝ Fil",    "Çapraz yönde istediği kadar kayar.",                     "#d8b8f8"},
+            {"♜ Kale",   "Yatay veya dikey istediği kadar kayar.",                 "#f8d8a8"},
+            {"♛ Vezir",  "Her yönde (çapraz + düz) istediği kadar kayar.",        "#f8a8a8"},
+        };
+
+        GridPane tasGrid = new GridPane();
+        tasGrid.setHgap(10); tasGrid.setVgap(6);
+        for (int i = 0; i < taslar.length; i++) {
+            Label sym  = new Label((String)taslar[i][0]);
+            sym.setStyle("-fx-font-size:14px; -fx-text-fill:" + taslar[i][2] + "; -fx-min-width:55; -fx-font-weight:bold;");
+            Label desc = new Label((String)taslar[i][1]);
+            desc.setStyle("-fx-font-size:12px; -fx-text-fill:" + yazi + ";");
+            desc.setWrapText(true);
+            tasGrid.add(sym, 0, i);
+            tasGrid.add(desc, 1, i);
+        }
+        tasPane.getChildren().addAll(tasBaslik, tasGrid);
+
+        // ── Zorluk seçimi ────────────────────────────────────────────────────
+        VBox zorlukPane = new VBox(8);
+        zorlukPane.setPadding(new Insets(12));
+        zorlukPane.setStyle(
+            "-fx-background-color:" + panel + ";" +
+            "-fx-border-color:#1e3a5f; -fx-border-radius:10; -fx-background-radius:10;");
+
+        Label zorlukBaslik = new Label("⚙  Zorluk Seç");
+        zorlukBaslik.setStyle("-fx-font-size:14px; -fx-font-weight:bold; -fx-text-fill:" + vurgu + ";");
 
         ToggleGroup zorlukGrup = new ToggleGroup();
-        VBox zorluklar = new VBox(8);
-        for (ChessBoardMode.ChessAyar p : ChessBoardMode.PRESETLER) {
+        VBox zorluklar = new VBox(6);
+        String[] zorlukAciklamalar = {
+            "Piyon ve At — Yavaş hareket, başlangıç için ideal.",
+            "Fil ve Kale — Kayarak hareket, orta güçlük.",
+            "Sadece Vezir — Her yönde kayar, en yüksek tehlike!"
+        };
+        ChessBoardMode.ChessAyar[] presets = ChessBoardMode.PRESETLER;
+        for (int i = 0; i < presets.length; i++) {
+            ChessBoardMode.ChessAyar p = presets[i];
             RadioButton rb = new RadioButton(p.etiket() + "  (" + p.sureSaniye() + "s)");
             rb.setToggleGroup(zorlukGrup);
             rb.setUserData(p);
-            rb.setStyle("-fx-text-fill:" + yazi + ";-fx-font-size:13px;");
+            rb.setStyle("-fx-text-fill:" + yazi + "; -fx-font-size:13px; -fx-font-weight:bold;");
             if (p.zorluk() == 1) rb.setSelected(true);
-            zorluklar.getChildren().add(rb);
+            Label acDesc = new Label("    " + zorlukAciklamalar[i]);
+            acDesc.setStyle("-fx-font-size:11px; -fx-text-fill:#5a7090;");
+            zorluklar.getChildren().addAll(rb, acDesc);
         }
+        zorlukPane.getChildren().addAll(zorlukBaslik, zorluklar);
 
-        // Taş açıklamaları
-        Label tasBaslik = new Label("Taş Hareketleri:");
-        tasBaslik.setStyle("-fx-font-size:13px;-fx-font-weight:bold;-fx-text-fill:" + vurgu + ";");
-        String[] taslar = {
-            "♟ Piyon  — 1 adım aşağı",
-            "♞ At     — L şeklinde",
-            "♝ Fil    — Çapraz kayar",
-            "♜ Kale   — Düz kayar",
-            "♛ Vezir  — Her yönde kayar"
-        };
-        VBox tasKutu = new VBox(3);
-        for (String t : taslar) {
-            Label l = new Label(t);
-            l.setStyle("-fx-font-size:12px;-fx-text-fill:#bdc3c7;");
-            tasKutu.getChildren().add(l);
-        }
-
-        Button oynaBtn = new Button("▶  Oyna!");
-        oynaBtn.setPrefWidth(180); oynaBtn.setPrefHeight(44);
-        oynaBtn.setStyle("-fx-background-color:" + vurgu + ";-fx-text-fill:#1a1a2e;" +
-                         "-fx-font-size:15px;-fx-font-weight:bold;-fx-background-radius:10;-fx-cursor:hand;");
+        // ── Oyna butonu ───────────────────────────────────────────────────────
+        Button oynaBtn = new Button("▶  Oyunu Başlat!");
+        oynaBtn.setPrefWidth(220); oynaBtn.setPrefHeight(46);
+        oynaBtn.setStyle(
+            "-fx-background-color: linear-gradient(to right, #c09000, #f0c040);" +
+            "-fx-text-fill:#0a0918; -fx-font-size:15px; -fx-font-weight:bold;" +
+            "-fx-background-radius:12; -fx-cursor:hand;" +
+            "-fx-effect: dropshadow(gaussian,#f0c04088,12,0.4,0,2);");
+        oynaBtn.setOnMouseEntered(e -> oynaBtn.setOpacity(0.88));
+        oynaBtn.setOnMouseExited(e  -> oynaBtn.setOpacity(1.0));
         oynaBtn.setOnAction(e -> {
             ChessBoardMode.ChessAyar secilen = (ChessBoardMode.ChessAyar)
                     ((RadioButton) zorlukGrup.getSelectedToggle()).getUserData();
@@ -577,16 +722,24 @@ public class MinesweeperApp extends Application {
             oyunSahnesiniBaSlat(false, true);
         });
 
-        Separator sep = new Separator();
-        sep.setStyle("-fx-background-color:#2c3e50;");
+        HBox butonKutu = new HBox(oynaBtn);
+        butonKutu.setAlignment(Pos.CENTER);
+        butonKutu.setPadding(new Insets(8, 0, 0, 0));
 
-        VBox kok = new VBox(14, baslik, aciklama, sep, zorlukBaslik, zorluklar,
-                            tasBaslik, tasKutu, oynaBtn);
-        kok.setPadding(new Insets(24)); kok.setAlignment(Pos.CENTER_LEFT);
+        VBox kok = new VBox(12,
+            baslik, altBaslik, sep0,
+            nasılPane, tasPane, zorlukPane,
+            butonKutu);
+        kok.setPadding(new Insets(22));
+        kok.setAlignment(Pos.TOP_LEFT);
         kok.setStyle("-fx-background-color:" + arka + ";");
-        kok.setMinWidth(360);
+        kok.setMinWidth(440);
 
-        Scene dialogSahne = new Scene(kok);
+        ScrollPane scroll = new ScrollPane(kok);
+        scroll.setFitToWidth(true);
+        scroll.setStyle("-fx-background-color:" + arka + "; -fx-background:" + arka + ";");
+
+        Scene dialogSahne = new Scene(scroll, 460, 640);
         globalCssUygula(dialogSahne);
         dialog.setScene(dialogSahne);
         dialog.showAndWait();
@@ -833,7 +986,7 @@ public class MinesweeperApp extends Application {
                             boolean kapali = satranModu
                                     ? (!chessBoardMode.isRevealed(sr, su) && !chessBoardMode.isFlagged(sr, su))
                                     : (!aktifTahtaHucre(sr, su).isAcildiMi() && !aktifTahtaHucre(sr, su).isIsaretlendi());
-                            if (kapali) btn.setStyle(acilmamisHucreHoverTarzi());
+                            if (kapali) btn.setStyle(acilmamisHucreHoverTarzi(sr, su));
                         }
                     }
                 });
@@ -845,7 +998,7 @@ public class MinesweeperApp extends Application {
                             boolean kapali = satranModu
                                     ? (!chessBoardMode.isRevealed(sr, su) && !chessBoardMode.isFlagged(sr, su))
                                     : (!aktifTahtaHucre(sr, su).isAcildiMi() && !aktifTahtaHucre(sr, su).isIsaretlendi());
-                            if (kapali) btn.setStyle(acilmamisHucreTarzi());
+                            if (kapali) btn.setStyle(acilmamisHucreTarzi(sr, su));
                         }
                     }
                 });
@@ -1882,17 +2035,33 @@ public class MinesweeperApp extends Application {
 
     // ── Cell style helpers ────────────────────────────────────────────────────
 
+    // Konumsuz overload — chess dışı modlar için (pozisyon bağımsız)
     private String acilmamisHucreTarzi() {
-        if (satranModu) return "-fx-background-color:" + CH_ACILMAMIS_LIGHT + ";-fx-border-color:" + CH_CERCEVE + ";-fx-border-width:1;-fx-background-radius:4;-fx-border-radius:4;-fx-padding:0;-fx-cursor:hand;";
+        return acilmamisHucreTarzi(-1, -1);
+    }
+
+    // Konumlu — satranç modunda doğru rengi (açık/koyu kare) döndürür
+    private String acilmamisHucreTarzi(int r, int c) {
+        if (satranModu) {
+            boolean isLight = (r < 0 || c < 0) || (r + c) % 2 == 0;
+            String bg = isLight ? CH_ACILMAMIS_LIGHT : CH_ACILMAMIS_DARK;
+            return "-fx-background-color:" + bg + ";-fx-border-color:" + CH_CERCEVE + ";-fx-border-width:1;-fx-background-radius:4;-fx-border-radius:4;-fx-padding:0;-fx-cursor:hand;";
+        }
         if (leblebModu) return "-fx-background-color:" + LB_ACILMAMIS + ";-fx-border-color: #e8c55a #7a5500 #7a5500 #e8c55a;-fx-border-width:2;-fx-background-radius:3;-fx-border-radius:3;-fx-padding:0;-fx-cursor:hand;";
         String bg = karanlikTema ? KT_ACILMAMIS : AT_ACILMAMIS; String br = karanlikTema ? KT_CERCEVE : AT_CERCEVE;
         return "-fx-background-color:" + bg + ";-fx-border-color:" + br + ";-fx-border-width:1;-fx-background-radius:3;-fx-border-radius:3;-fx-padding:0;-fx-cursor:hand;";
     }
 
+    // Hover — konumsuz overload
     private String acilmamisHucreHoverTarzi() {
-        if (satranModu) return "-fx-background-color:#f0c040;-fx-border-color:#d4a800;-fx-border-width:2;-fx-background-radius:4;-fx-border-radius:4;-fx-padding:0;-fx-cursor:hand;";
+        return acilmamisHucreHoverTarzi(-1, -1);
+    }
+
+    // Hover — konumlu (satranç modunda sarı highlight)
+    private String acilmamisHucreHoverTarzi(int r, int c) {
+        if (satranModu) return "-fx-background-color:#e8c84a;-fx-border-color:#c8a800;-fx-border-width:2;-fx-background-radius:4;-fx-border-radius:4;-fx-padding:0;-fx-cursor:hand;";
         if (leblebModu) return "-fx-background-color:#d9aa3a;-fx-border-color: #f0d070 #8a6510 #8a6510 #f0d070;-fx-border-width:2;-fx-background-radius:3;-fx-border-radius:3;-fx-padding:0;-fx-cursor:hand;";
-        String bg = karanlikTema ? "#5a5770" : "#d0d8e8"; String br = karanlikTema ? KT_CERCEVE : AT_CERCEVE;
+        String bg = karanlikTema ? "#524f70" : "#c8d0e8"; String br = karanlikTema ? KT_CERCEVE : AT_CERCEVE;
         return "-fx-background-color:" + bg + ";-fx-border-color:" + br + ";-fx-border-width:1;-fx-background-radius:3;-fx-border-radius:3;-fx-padding:0;-fx-cursor:hand;";
     }
 
