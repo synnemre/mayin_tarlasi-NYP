@@ -13,6 +13,12 @@ public class Board {
     // Performance: track how many safe cells are still closed
     private int kapaliGuvenliHucre;
 
+    private Runnable onSafeCellOpened = null;
+
+    public void setOnSafeCellOpened(Runnable callback) {
+        this.onSafeCellOpened = callback;
+    }
+
     public Board(int satirSayisi, int sutunSayisi, int toplamMayin) {
         this.satirSayisi = satirSayisi;
         this.sutunSayisi = sutunSayisi;
@@ -134,6 +140,10 @@ public class Board {
         // Track opened safe cells — single place; flood-fill below uses this same path
         kapaliGuvenliHucre = Math.max(0, kapaliGuvenliHucre - 1);
 
+        if (onSafeCellOpened != null) {
+            onSafeCellOpened.run();
+        }
+
         if (hucre.getKomsuMayinSayisi() > 0) return false;
 
         // Flood-fill for empty cells
@@ -180,6 +190,11 @@ public class Board {
         }
 
         kapaliGuvenliHucre = Math.max(0, kapaliGuvenliHucre - 1);
+
+        if (onSafeCellOpened != null) {
+            onSafeCellOpened.run();
+        }
+
         // flood-fill YOK — sadece bu hücre açılır
         return false;
     }
@@ -350,6 +365,7 @@ public class Board {
         // Fast path: use counter instead of scanning every cell
         return !oyunBitti && kapaliGuvenliHucre == 0;
     }
+
 
     // English aliases
     public void    revealClassic(int s, int u) { acKlasik(s, u); }

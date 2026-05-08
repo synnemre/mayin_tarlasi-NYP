@@ -111,11 +111,13 @@ public class LeblebiBoardMode {
     private int kullanilanSaat      = 0;
     private int kullanilanIlac      = 0;
     private int kullanilanKalp      = 0;
+    private int altinIlerlemeSayaci = 0;
 
     public LeblebiBoardMode(int satirSayisi, int sutunSayisi,
                              int solucanSayisi, int sureSaniye, int baslangicCan,
                              int baslangicAltin, int toplamKargaKullanim, int toplamIlacKullanim) {
         this.tahta           = new Board(satirSayisi, sutunSayisi, solucanSayisi);
+        this.tahta.setOnSafeCellOpened(this::hucrePuaniEkleBir);
         this.baslangicSuresi = sureSaniye;
         this.baslangicCan    = baslangicCan;
         this.kalanSure       = sureSaniye;
@@ -140,6 +142,10 @@ public class LeblebiBoardMode {
         for(int i=0; i<Math.min(3, havuz.size()); i++) {
             aktifGorevler.add(havuz.get(i));
         }
+    }
+    private void hucrePuaniEkleBir() {
+        hucrePuaniEkle(1);
+        acilanHucreSayisi++;
     }
 
     // ── Hücre açma (lives-aware) ─────────────────────────────────────────────
@@ -197,8 +203,6 @@ public class LeblebiBoardMode {
             // Clear karga highlight once the player opens any safe cell
             kargayiTemizle();
             // Güvenli hücre açıldı: puan + hasat sayıcı
-            puanEkle(1);
-            acilanHucreSayisi++;
         }
 
         // Always check win condition after a successful open
@@ -253,16 +257,17 @@ public class LeblebiBoardMode {
 
     /**
      * Hücre açılışından kazanilan puanı ekle.
-     * Her 10 puanda 1 altın kazandırır.
+     * Her 2 güvenli hücre 1 altın kazandırır.
      */
     public void hucrePuaniEkle(int miktar) {
-        int onceki = hucrePuaniKazanildi;
         leblebPuani         += miktar;
         hucrePuaniKazanildi += miktar;
-        
-        int kazanilanAltin = (hucrePuaniKazanildi / 10) - (onceki / 10);
-        if (kazanilanAltin > 0) {
-            altinEkle(kazanilanAltin);
+
+        altinIlerlemeSayaci += miktar;
+
+        while (altinIlerlemeSayaci >= 4) {
+            altinEkle(1);
+            altinIlerlemeSayaci -= 4;
         }
     }
 
