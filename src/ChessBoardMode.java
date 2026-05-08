@@ -110,8 +110,8 @@ public class ChessBoardMode {
         SecureRandom rnd = new SecureRandom();
         int type = switch (difficulty) {
             case 1 -> rnd.nextInt(2);       // Piyon, At
-            case 2 -> 3;       // Piyon, At, Fil
-            default -> rnd.nextInt(3, 5);      // Hepsi
+            case 2 -> rnd.nextInt(3);       // Piyon, At, Fil
+            default -> rnd.nextInt( 5);      // Hepsi
         };
         return switch (type) {
             case 0 -> new PawnMine(r, c);
