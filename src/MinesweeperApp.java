@@ -83,9 +83,13 @@ public class MinesweeperApp extends Application {
             "#ffc060", "#40d8e8", "#f080b8", "#a8b8c8" };
 
     // ── Application state ─────────────────────────────────────────────────────
-    private Stage  pencere;
-    private Scene  anaSahne;
-    private Scene  menuSahne;
+    private Stage     pencere;
+    private Scene     anaSahne;
+    private Scene     menuSahne;
+
+    // ── Single persistent scene — swapping root avoids any window resize ──────
+    private Scene     rootScene;
+    private StackPane rootWrapper;
 
     private KlasikBoardMode   klasikBoardMode;
     private LeblebiBoardMode  leblebiBoardMode;
@@ -177,13 +181,16 @@ public class MinesweeperApp extends Application {
     @Override
     public void start(Stage pencere) {
         this.pencere = pencere;
-        menuGoster();
+        rootWrapper = new StackPane();
+        rootScene   = new Scene(rootWrapper, 660, 580);
+        pencere.setScene(rootScene);
         pencere.setTitle("Mayın Tarlası");
         pencere.setMinWidth(560);
         pencere.setMinHeight(500);
         pencere.setResizable(true);
         pencere.centerOnScreen();
         pencere.show();
+        menuGoster();
 
         Thread yukleyici = new Thread(() -> {
             sesFxYukle();
@@ -302,8 +309,8 @@ public class MinesweeperApp extends Application {
         StackPane kokDuzenleyici = new StackPane(kok);
         kokDuzenleyici.setId("menuRoot");
 
-        menuSahne = new Scene(kokDuzenleyici, 660, 580);
-        menuSahne.setOnKeyPressed(olay -> {
+        menuSahne = rootScene;
+        rootScene.setOnKeyPressed(olay -> {
             if (leblebAcildi) return;
             String k = olay.getText();
             if (!k.isEmpty() && "1234567890".contains(k)) {
@@ -318,9 +325,8 @@ public class MinesweeperApp extends Application {
             }
         });
 
-        globalCssUygula(menuSahne);
-        pencere.setScene(menuSahne);
-        pencere.sizeToScene();
+        globalCssUygula(rootScene);
+        rootWrapper.getChildren().setAll(kokDuzenleyici);
     }
 
     /** Kare menü butonu — ikon + iki satır yazı */
@@ -807,9 +813,12 @@ public class MinesweeperApp extends Application {
         anaSahneKoku = new StackPane(kokDuzen);
         anaSahneKoku.setStyle("-fx-background-color: transparent;");
 
-        sahne = new Scene(anaSahneKoku, genislik, yukseklik);
-        sahne.widthProperty().addListener((g, e, y) -> hucreBoyutlariniGuncelle());
-        sahne.heightProperty().addListener((g, e, y) -> hucreBoyutlariniGuncelle());
+        sahne = rootScene;
+        // Remove any previously registered resize listeners before adding new ones
+        rootScene.widthProperty().removeListener(this::onSceneResize);
+        rootScene.heightProperty().removeListener(this::onSceneResize);
+        rootScene.widthProperty().addListener(this::onSceneResize);
+        rootScene.heightProperty().addListener(this::onSceneResize);
         globalCssUygula(sahne);
 
         if (leblebi) {
@@ -842,8 +851,9 @@ public class MinesweeperApp extends Application {
             konusmaBalonuPanel = null;
             konusmaBalonuLabel = null;
         }
-
-        pencere.setScene(sahne);
+        globalCssUygula(rootScene);
+        rootScene.setOnKeyPressed(null);
+        rootWrapper.getChildren().setAll(anaSahneKoku);
         hucreBoyutlariniGuncelle();
     }
 
@@ -2009,6 +2019,10 @@ public class MinesweeperApp extends Application {
                 }
             }
         }
+    }
+
+    private void onSceneResize(javafx.beans.value.ObservableValue<?> obs, Object o, Object n) {
+        hucreBoyutlariniGuncelle();
     }
 
     private void tumHucreleriYenidenCiz() {
