@@ -29,9 +29,9 @@ public class ChessBoardMode {
     ) {}
 
     public static final ChessAyar[] PRESETLER = {
-        new ChessAyar("♟ Kolay  (Piyon + At)",        1, 180),
-        new ChessAyar("♝ Orta   (+ Fil)",             2, 240),
-        new ChessAyar("♛ Zor    (+ Kale + Vezir)",    3, 300),
+        new ChessAyar("♟♞ Kolay  (Piyon + At)",        1, 180),
+        new ChessAyar("♝♜ Orta   (Fil + Kale)",             2, 240),
+        new ChessAyar("♛ Zor    (Vezir)",    3, 300),
     };
 
     // ── Tahta durumu ──────────────────────────────────────────────────────────
@@ -109,9 +109,9 @@ public class ChessBoardMode {
     private ChessMine createMine(int r, int c) {
         SecureRandom rnd = new SecureRandom();
         int type = switch (difficulty) {
-            case 1 -> rnd.nextInt(2);       // Piyon, At
-            case 2 -> rnd.nextInt(3);       // Piyon, At, Fil
-            default -> rnd.nextInt( 5);      // Hepsi
+            case 1 -> rnd.nextInt(2);       // Piyon ve At
+            case 2 -> rnd.nextInt(2,4);       // Fil Ve Kale
+            default -> rnd.nextInt(4, 5);      // Sadece Vezir
         };
         return switch (type) {
             case 0 -> new PawnMine(r, c);
