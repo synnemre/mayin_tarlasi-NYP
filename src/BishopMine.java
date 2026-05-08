@@ -1,14 +1,14 @@
 import java.util.ArrayList;
 import java.util.List;
 
-/** ♛ Vezir � her y�nde kayar. */
-class QueenMine extends ChessMine {
-    public QueenMine(int row, int col) { super(row, col); symbol = "♛"; name = "Vezir"; }
+/** ♝ Fil � �apraz y�nlerde kayar. */
+class BishopMine extends ChessMine {
+    public BishopMine(int row, int col) { super(row, col); symbol = "♝"; name = "Fil"; }
 
     @Override
     public List<int[]> getPossibleMoves(int boardSize) {
         List<int[]> moves = new ArrayList<>();
-        int[][] dirs = {{1,0},{-1,0},{0,1},{0,-1},{1,1},{1,-1},{-1,1},{-1,-1}};
+        int[][] dirs = {{1,1},{1,-1},{-1,1},{-1,-1}};
         for (int[] d : dirs) {
             int nr = row + d[0], nc = col + d[1];
             if (nr >= 0 && nr < boardSize && nc >= 0 && nc < boardSize)
@@ -20,7 +20,7 @@ class QueenMine extends ChessMine {
     @Override
     public List<int[]> getThreatenedSquares(int boardSize) {
         List<int[]> t = new ArrayList<>();
-        int[][] dirs = {{1,0},{-1,0},{0,1},{0,-1},{1,1},{1,-1},{-1,1},{-1,-1}};
+        int[][] dirs = {{1,1},{1,-1},{-1,1},{-1,-1}};
         for (int[] d : dirs) {
             int nr = row + d[0], nc = col + d[1];
             while (nr >= 0 && nr < boardSize && nc >= 0 && nc < boardSize) {
