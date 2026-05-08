@@ -1,166 +1,106 @@
-# Mayın Tarlası — Leblebi Tarlası Modu
+# 💣 Mayın Tarlası
 
-> Klasik Mayın Tarlası oyununun Türkçe, köy-temalı ve çok katmanlı indie yorumu. Mehmet Emmi'nin leblebi tarlasını yılanlardan temizle! 
+Klasik mayın tarlası oyununun üç farklı modda sunulduğu, JavaFX tabanlı masaüstü oyunu.
 
 ---
 
 ## 🎮 Oyun Modları
 
-### 🟫 Klasik Mod
-Standart Mayın Tarlası deneyimi. Bayrakları yerleştir, mayınlardan kaçın, alanı temizle.  
-- **Zamanlı mod:** Geri sayım başlar, süre bitince tüm mayınlar patlar.  
-- **Kronometreli mod:** Süren ölçülür ve skor tablosuna kaydedilir.
+### ⛏ Klasik Mayın Tarlası
+Herkesin bildiği klasik mayın tarlası deneyimi. Kronometre veya geri sayımlı zamanlı mod seçenekleri mevcut.
 
-### 🫘 Leblebi Tarlası Modu
-> ⚠️ Bu mod varsayılan olarak gizlidir. Aşağıdaki easter egg bölümüne bak.
+- 6 hazır zorluk seviyesi (Kolay / Orta / Zor, her biri zamanlı versiyonuyla birlikte)
+- Özel ızgara boyutu ve mayın sayısı ayarlanabilir (7×7 ile 30×30 arası)
+- İlk tıklamada mayına basılmaması garantili güvenli bölge sistemi
+- Zamanlı modda skor tablosuna kayıt
 
-Mehmet Emmi'nin yılan dolu leblebi tarlasını temizlediğin özel mod. Mayınlar = Yılanlar, Bayraklar = Çubuklar.
+### ♟ Satranç Mayın Tarlası
+Her hamlenin ardından taşların hareket ettiği dinamik bir mayın tarlası modu.
 
-**Özellikler:**
-- 🫀 Can sistemi — Yılana bastığında can kaybedersin, oyun devam eder
-- ⏳ Geri sayım süresi — Her bölümün sınırlı süresi var
-- 💰 Puan & Altın ayrımı — Altın bölümler arasında kalıcıdır
-- 🌟 Altın Leblebi — Gizli altın leblebiler +10 altın kazandırır
+- 9×9 tahta, 3 zorluk seviyesi
+- **Kolay:** Piyon (♟) + At (♞)
+- **Orta:** Fil (♝) + Kale (♜)
+- **Zor:** Yalnızca Vezir (♛)
+- Her güvenli açışın ardından tüm taşlar satranç kurallarına göre hareket eder
+- Tehdit sayıları anlık olarak güncellenir
+- Fildişi ve koyu kahve satranç tahtası görseli
 
----
+### 🫘 Mehmet Emmi'nin Leblebi Tarlası *(Gizli Mod)*
+Oyun ana ekranında `1837837` kodunu klavyeden girerek açılır.
 
-## 🥚 Easter Egg — Gizli Mod Nasıl Açılır?
-
-Ana menü açıkken klavyenden **`1837837`** yaz.
-
-Başka bir şeye tıklamana gerek yok — sadece menü açıkken bu rakamları sırayla bas. Kod doğruysa ekran sarsılır, altın bir parlamayla **"🫘 Mehmet Emmi'nin Leblebi Tarlası Modu Açıldı!"** mesajı belirir ve menüde gizli buton görünür hale gelir.
-
-> Bu kodu nereden buldun diye sorma. Mehmet Emmi bize fısıldadı.
-
----
-
-## 🗺️ Bölümler
-
-| # | İsim | Izgara | Yılan | Süre |
-|---|------|--------|-------|------|
-| 1 | Evin Arka Bahçesi | 8×8 | 9 | 120s |
-| 2 | Ana Tarla | 10×10 | 15 | 180s |
-| 3 | Bereketli Topraklar 🌙 | 15×15 | 35 | 240s |
-
-> **🌙 Gece Modu:** 3. bölümde (ve ilerleyen her 4. bölümde) gece karanlığı çöker. Fare imlecin etrafında fener ışığı yanar, diğer her yer sisin altında kalır.
+- 3 bölüm: Evin Arka Bahçesi → Ana Tarla → Bereketli Topraklar
+- Can sistemi: Yılana basmak oyunu bitirmez, can düşürür
+- Altın para birimi ve market sistemi
+- **Market ürünleri:**
+  - 🐦 **Karga** (20 💰) — Rastgele yılan konumlarını gösterir; seviye arttıkça daha fazlasını gösterir
+  - ⏰ **Emmi'nin Saati** (30 💰) — 30 saniye ekler
+  - 🧪 **Zirai İlaç** (50 💰) — Bir sonraki tıklamada 3×3 (veya daha geniş) alanı temizler
+  - ❤️ **Ekstra Kalp** (100 💰) — +1 can
+- Görev sistemi (hızlı bitir, karga kullanma, çoklu hücre aç vb.)
+- Gizli başarımlar (Körü Körüne, Aceleci Emmi, Sağlam Yürek, Leblebi Ustası)
+- Hasat raporu ve Mehmet Emmi'nin konuşma balonları
+- Gece modu (3. bölümde fare konumuna göre fener efekti)
 
 ---
 
-## 🛒 Market — Mehmet Emmi'nin Dükkanı
+## 🏆 Skor Tablosu
 
-Market itemleri **altınla** alınır. Altın bölümler arasında **kalıcıdır**.
+Tamamlanan oyunlar `scores.json` dosyasına kaydedilir. Skor tablosunda üç ayrı sekme bulunur:
 
-| İtem | Fiyat | Efekt |
-|------|-------|-------|
-| 🐦 Karga | 20 💰 | Yılan konumlarını gösterir |
-| ⏰ Emmi'nin Saati | 30 💰 | +30 saniye ekler |
-| 🧪 Zirai İlaç | 50 💰 | Bir alandaki yılanları yok eder |
-| ❤️ Ekstra Kalp | 100 💰 | +1 can ekler |
-| 🕯️ Fener Genişlet | 15 💰 | Gece modunda fener yarıçapını artırır *(sadece gece bölümlerinde)* |
-
-### ⬆️ Item Upgrade Sistemi
-Aynı item ne kadar çok kullanılırsa o kadar güçlenir:
-
-**Zirai İlaç:**
-- Seviye 1 → 3×3 alan temizler
-- Seviye 2 → 5×5 alan temizler
-- Seviye 3 → Çapraz (Cross) tüm satır/sütun temizler
-
-**Karga:**
-- Seviye 1 → 1 rastgele yılan gösterir
-- Seviye 2 → 3 rastgele yılan gösterir
-- Seviye 3 → En yakın yılanı gösterir
+| Sekme | Açıklama |
+|---|---|
+| ⏱ Klasik (Zamanlı) | Geri sayımlı klasik mod sonuçları |
+| ♟ Satranç Modu | Satranç moduna özel sıralama |
+| 🫘 Leblebi Tarlası | Gizli mod aktifken görünür |
 
 ---
 
-## 📋 Görev Sistemi
+## 🛠 Gereksinimler
 
-Her bölümde 3 rastgele görev verilir. Tamamlayanlar **puan + altın** kazanır:
-
-| Görev | Ödül |
-|-------|------|
-| 10 Hücre Aç | +50 Puan, +5 Altın |
-| İlaçla 3 Yılan Avla | +80 Puan, +8 Altın |
-| Karga Kullanma | +100 Puan, +10 Altın |
-| Sürenin Yarısında Bitir | +150 Puan, +15 Altın |
+- **Java 17** veya üzeri
+- **JavaFX 17** veya üzeri
 
 ---
 
-## 🏆 Gizli Başarımlar
+## 🚀 Çalıştırma
 
-Bölüm sonunda otomatik kontrol edilir:
-
-| Başarım | Koşul |
-|---------|-------|
-| **Körü Körüne** | Hiç item kullanmadan kazan |
-| **Aceleci Emmi** | 30 saniye veya daha az sürede kazan |
-| **Sağlam Yürek** | 3 can kaybedip yine de kazan |
-| **Leblebi Ustası** | 200+ puan ile bitir |
-
----
-
-## 📊 Hasat Raporu
-
-Bölüm sonunda animasyonlu bir "fiş" ekranı açılır:
-- Zaman bonusu, açılan hücreler, yok edilen yılanlar ayrı ayrı gösterilir
-- Tamamlanan görevler listelenir
-- Kazanılan gizli başarımlar gösterilir
-- Mehmet Emmi puanına göre yorum yapar 😄
-
----
-
-## 🏗️ Teknik Yapı
-
-```
-src/
-├── MinesweeperApp.java     # Ana JavaFX uygulaması (UI, event handling)
-├── Board.java              # Oyun tahtası mantığı (hücre açma, flood-fill)
-├── Cell.java               # Tek hücre veri modeli
-├── KlasikBoardMode.java    # Klasik mod yöneticisi
-├── LeblebiBoardMode.java   # Leblebi modu yöneticisi (can, puan, görev, diyalog)
-├── Seviye.java             # Bölüm tanımları
-└── SkorTablosu.java        # Skor kayıt/yükleme sistemi (JSON)
-```
-
-**Platform:** Java + JavaFX  
-**Derleme:** OpenJFX (modüler)
-
----
-
-## 🔧 Kurulum & Çalıştırma
-
-### Gereksinimler
-- Java 17+ (BellSoft Liberica veya OpenJDK)
-- JavaFX (`/usr/share/openjfx/lib` dizininde kurulu)
-
-### Derleme
 ```bash
-javac --module-path /usr/share/openjfx/lib \
+# JavaFX modül yolunu ayarlayarak derle
+javac --module-path /path/to/javafx/lib \
       --add-modules javafx.controls,javafx.media \
-      -d bin src/*.java
-```
+      *.java
 
-### Çalıştırma
-```bash
-java --module-path /usr/share/openjfx/lib \
+# Çalıştır
+java --module-path /path/to/javafx/lib \
      --add-modules javafx.controls,javafx.media \
-     -cp bin MinesweeperApp
+     MinesweeperApp
 ```
 
 ---
 
-## 💡 Notlar
+## 🎨 Tema & Arayüz
 
-- Skor tablosu `~/.local/share/mayintarlasi/` klasörüne JSON olarak kaydedilir
-- Leblebi modunda kazanılan altınlar bölümler arasında **kalıcıdır**, oyunu kapatsanız da bir sonraki oyun başlayışına kadar korunur
-- Gece modu otomatik olarak 3. bölümde aktif olur (ve her 4. bölümde tekrar)
+- **Karanlık tema** — Midnight Indigo (varsayılan)
+- **Açık tema** — Soft Lavender
+- **Leblebi teması** — Golden Harvest (otomatik, gizli mod aktifken)
+- **Satranç teması** — Ivory & Obsidian (otomatik, satranç modunda)
 
----
-
-## 👴 Mehmet Emmi Kimdir?
-
-Leblebi tarlasının sahibi, eski usul ama çok bilge bir köylü. Oyun boyunca köşede belirir ve ne yapmanız gerektiğini size söyler — iyi ya da kötü günde. Çok fazla can kaybederseniz biraz kızgın olabilir, ama kazandığınızda gözleri dolar. 🥹
+Klasik modda sağ üstteki ☀/★ butonu ile temalar arasında geçiş yapılabilir.
 
 ---
 
-*Made with ❤️ and lots of leblebi.*
+## 🕹 Kontroller
+
+| Eylem | Tuş / Tıklama |
+|---|---|
+| Hücre aç | Sol tık |
+| Bayrak dik / kaldır | Sağ tık |
+| Oyunu sıfırla | 🌾 / ♟ / 😊 butonu |
+| Menüye dön | ← Menü butonu |
+| Gizli modu aç | `1837837` (menü ekranında) |
+
+---
+
+## 📜 Lisans
+
+Bu proje eğitim amaçlı geliştirilmiştir.

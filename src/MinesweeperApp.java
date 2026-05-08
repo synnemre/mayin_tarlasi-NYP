@@ -445,6 +445,7 @@ public class MinesweeperApp extends Application {
                 out.setOnFinished(ev -> root.getChildren().remove(overlay));
                 out.play();
             });
+            tamamBtn.requestFocus();
         }
     }
 
