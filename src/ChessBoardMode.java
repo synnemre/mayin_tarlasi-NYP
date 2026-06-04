@@ -84,7 +84,8 @@ public class ChessBoardMode {
 
         SecureRandom rnd = new SecureRandom();
         while (mines.size() < count) {
-            int r = rnd.nextInt(BOARD_SIZE);
+            int maxRow = (difficulty == 1) ? BOARD_SIZE - 1 : BOARD_SIZE;
+            int r = rnd.nextInt(maxRow);            
             int c = rnd.nextInt(BOARD_SIZE);
             String key = r + "," + c;
             if (!used.contains(key)) {
@@ -100,9 +101,9 @@ public class ChessBoardMode {
 
     public int getMineCount() {
         return switch (difficulty) {
-            case 1 -> 8;
-            case 2 -> 6;
-            default -> 4;
+            case 1 -> 6;
+            case 2 -> 4;
+            default -> 3;
         };
     }
 
@@ -159,7 +160,7 @@ public class ChessBoardMode {
         }
 
         // Güvenli açış
-        openSafe(r, c);
+        openSafe(r, c,0);
 
         // Taşları hareket ettir
         moveMines();
@@ -170,42 +171,92 @@ public class ChessBoardMode {
         return false;
     }
 
-    private void openSafe(int r, int c) {
+    private void openSafe(int r, int c, int derinlik) {
         if (!inBounds(r, c) || revealed[r][c] || flagged[r][c] || mineBoard[r][c] != null) return;
+
         revealed[r][c] = true;
         acilanGuvenliHucre++;
-        // Flood-fill: tehdit 0 ise komşuları da aç
-        if (threatCount[r][c] == 0) {
-            for (int dr = -1; dr <= 1; dr++)
-                for (int dc = -1; dc <= 1; dc++)
-                    if (!(dr == 0 && dc == 0)) openSafe(r + dr, c + dc);
+
+        // ZİNCİRLEME AÇILIŞ SINIRI:
+        // Tehdit 0 ise komşuları aç, AMA sonsuza kadar değil!
+        // derinlik < 1 : Sadece etrafındaki 8 kareyi açar (3x3 bölge)
+        // Eğer bunun çok dar olduğunu düşünürsen derinlik < 2 (5x5 bölge) yapabilirsin.
+        if (threatCount[r][c] == 0 && derinlik < 2) {
+            for (int dr = -1; dr <= 1; dr++) {
+                for (int dc = -1; dc <= 1; dc++) {
+                    if (!(dr == 0 && dc == 0)) {
+                        openSafe(r + dr, c + dc, derinlik + 1);
+                    }
+                }
+            }
         }
     }
 
     // ── Taş hareketi ──────────────────────────────────────────────────────────
 
     private void moveMines() {
-        // mineBoard temizle
+        // 1. Tahtayı temizle
         for (ChessMine[] row : mineBoard) Arrays.fill(row, null);
 
-        // Her taşı hareket ettir
-        for (ChessMine mine : mines) mine.move(BOARD_SIZE, revealed);
-
-        // Çakışma: aynı kareye gelen taşları çıkar
         Set<String> occupied = new HashSet<>();
-        List<ChessMine> surviving = new ArrayList<>();
+        List<ChessMine> hareketEdecekler = new ArrayList<>();
+
+        // 2. Taşları ayır: ÖNCE bayraklı (sabit) taşları çivile
         for (ChessMine mine : mines) {
-            String key = mine.getRow() + "," + mine.getCol();
-            if (!occupied.contains(key)) {
+            if (flagged[mine.getRow()][mine.getCol()]) {
+                // Bu taş kilitli, yeri değişmez. Hemen tahtaya koy ve burayı "dolu" işaretle.
+                String key = mine.getRow() + "," + mine.getCol();
                 occupied.add(key);
-                surviving.add(mine);
                 mineBoard[mine.getRow()][mine.getCol()] = mine;
+            } else {
+                // Bayraksızsa hareket listesine al
+                hareketEdecekler.add(mine);
             }
         }
-        mines = surviving;
+
+        // 3. ŞİMDİ hareketli taşları oynat ve çakışmaları çöz
+        for (ChessMine mine : hareketEdecekler) {
+            mine.move(BOARD_SIZE, revealed);
+            String key = mine.getRow() + "," + mine.getCol();
+
+            // Eğer geldiği kare DOLUYSA (başka bir sabit veya hareketli taş varsa)
+            if (occupied.contains(key)) {
+                List<int[]> bosKareler = new ArrayList<>();
+                for (int r = 0; r < BOARD_SIZE; r++) {
+                    for (int c = 0; c < BOARD_SIZE; c++) {
+                        // Kural: Kapalı olacak, boş olacak ve BAYRAKSIZ olacak
+                        if (!occupied.contains(r + "," + c) && !revealed[r][c] && !flagged[r][c]) {
+                            bosKareler.add(new int[]{r, c});
+                        }
+                    }
+                }
+
+                // Eğer güvenli bayraksız yer kalmadıysa (oyun sonu sıkışması), mecburen boş bir yere koy
+                if (bosKareler.isEmpty()) {
+                    for (int r = 0; r < BOARD_SIZE; r++) {
+                        for (int c = 0; c < BOARD_SIZE; c++) {
+                            if (!occupied.contains(r + "," + c) && !revealed[r][c]) {
+                                bosKareler.add(new int[]{r, c});
+                            }
+                        }
+                    }
+                }
+
+                // Taşı yeni boş yere ışınla
+                if (!bosKareler.isEmpty()) {
+                    int[] yeniYer = bosKareler.get(new SecureRandom().nextInt(bosKareler.size()));
+                    mine.setPosition(yeniYer[0], yeniYer[1]);
+                    key = mine.getRow() + "," + mine.getCol();
+                }
+            }
+
+            // Yeni yeri kaydet ve tahtaya ekle
+            occupied.add(key);
+            mineBoard[mine.getRow()][mine.getCol()] = mine;
+        }
+
         toplamGuvenliHucre = BOARD_SIZE * BOARD_SIZE - mines.size();
     }
-
     // ── Bayrak ────────────────────────────────────────────────────────────────
 
     public void isaretKoy(int r, int c) {

@@ -39,7 +39,6 @@ Oyun ana ekranında `1837837` kodunu klavyeden girerek açılır.
 - Görev sistemi (hızlı bitir, karga kullanma, çoklu hücre aç vb.)
 - Gizli başarımlar (Körü Körüne, Aceleci Emmi, Sağlam Yürek, Leblebi Ustası)
 - Hasat raporu ve Mehmet Emmi'nin konuşma balonları
-- Gece modu (3. bölümde fare konumuna göre fener efekti)
 
 ---
 
@@ -101,6 +100,4 @@ Klasik modda sağ üstteki ☀/★ butonu ile temalar arasında geçiş yapılab
 
 ---
 
-## 📜 Lisans
-
-Bu proje eğitim amaçlı geliştirilmiştir.
+made with lots of 🩸 sweat and tears 

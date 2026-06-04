@@ -12,6 +12,11 @@ public abstract class ChessMine {
     protected String name;
     protected static final Random random = new Random();
 
+    public void setPosition(int r, int c) {
+        this.row = r;
+        this.col = c;
+    }
+
     public ChessMine(int row, int col) {
         this.row = row;
         this.col = col;
@@ -24,14 +29,21 @@ public abstract class ChessMine {
     public abstract List<int[]> getThreatenedSquares(int boardSize);
 
     /** Taşı tahta üzerinde bir adım hareket ettirir. Açık karelere gitmekten kaçınır. */
+    /** Taşı tahta üzerinde bir adım hareket ettirir. Sadece kapalı karelere gidebilir. */
     public void move(int boardSize, boolean[][] revealed) {
         List<int[]> moves = getPossibleMoves(boardSize);
-        List<int[]> preferred = new ArrayList<>();
-        for (int[] m : moves)
-            if (!revealed[m[0]][m[1]]) preferred.add(m);
-        List<int[]> pool = preferred.isEmpty() ? moves : preferred;
-        if (!pool.isEmpty()) {
-            int[] pick = pool.get(random.nextInt(pool.size()));
+        List<int[]> validMoves = new ArrayList<>();
+
+        // Taşlar SADECE henüz açılmamış (kapalı) karelere gidebilir
+        for (int[] m : moves) {
+            if (!revealed[m[0]][m[1]]) {
+                validMoves.add(m);
+            }
+        }
+
+        // Gidebileceği kapalı bir kare varsa hareket et, yoksa olduğu yerde kal (köşeye sıkıştı)
+        if (!validMoves.isEmpty()) {
+            int[] pick = validMoves.get(random.nextInt(validMoves.size()));
             row = pick[0];
             col = pick[1];
         }

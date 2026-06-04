@@ -12,16 +12,16 @@ public class Seviye {
     private final String isim;
     private final int    satirSayisi;
     private final int    sutunSayisi;
-    private final int    solucanSayisi;
+    private final int    yilanSayisi;
     private final int    sureSaniye;
 
     public Seviye(int numara, String isim, int satirSayisi, int sutunSayisi,
-                  int solucanSayisi, int sureSaniye) {
+                  int yilanSayisi, int sureSaniye) {
         this.numara        = numara;
         this.isim          = isim;
         this.satirSayisi   = satirSayisi;
         this.sutunSayisi   = sutunSayisi;
-        this.solucanSayisi = solucanSayisi;
+        this.yilanSayisi   = yilanSayisi;
         this.sureSaniye    = sureSaniye;
     }
 
@@ -29,7 +29,7 @@ public class Seviye {
     public String getIsim()          { return isim; }
     public int    getSatirSayisi()   { return satirSayisi; }
     public int    getSutunSayisi()   { return sutunSayisi; }
-    public int    getSolucanSayisi() { return solucanSayisi; }
+    public int    getYilanSayisi()   { return yilanSayisi; }
     public int    getSureSaniye()    { return sureSaniye; }
 
     // ── Seviye listesi ───────────────────────────────────────────────────────

@@ -20,41 +20,57 @@ public class LeblebiBoardMode {
 
     /** Her oyun olayına karşılık gelen diyalog tetikleyicileri. */
     public enum DiyalogTetikleyici {
-        LEVEL_BASI, CAN_KAYBI, KAZANMA, KAYBETME, ITEM_KULLANIMI
+        LEVEL_BASI, CAN_KAYBI, KAZANMA, KAYBETME, ITEM_KULLANIMI, KARGA_KULLANIMI, SAAT_KULLANIMI, ILAC_KULLANIMI, EKSTRA_KALP
     }
 
     private static final Map<DiyalogTetikleyici, String[]> DIYALOG_HAVUZU;
     static {
         DIYALOG_HAVUZU = new EnumMap<>(DiyalogTetikleyici.class);
         DIYALOG_HAVUZU.put(DiyalogTetikleyici.LEVEL_BASI, new String[]{
-            "Haydi evladım! Tarlamı yılanlardan temizle!",
-            "Bu yılanlar leblebi tarlama girdi, defet şunları!",
-            "Dikkat et, yılanlar sinsi olur. Acele etme!",
-            "Bismillah! Bu tarla senin elinde, yılan bırakma!"
+            "Hadi bismillah. Leblebileri yılanlara yem etmeden şu tarlayı bir temizleyelim.",
+            "Tarlaya giriyoruz, dikkatli bas. Acele etmene gerek yok, yavaş yavaş hallederiz.",
+            "Bu sene yılan fena dadandı. Gözünü seveyim dikkat et, boşa gitmesin emekler.",
+            "Başla bakalım aslan parçası, göreyim seni. Hadi kolay gelsin."
         });
         DIYALOG_HAVUZU.put(DiyalogTetikleyici.CAN_KAYBI, new String[]{
-            "Eyvah! Yılana bastın evladım!",
-            "Dur dur, bak nereye basıyorsun!",
-            "O yılan seni bekliyordu, dikkat et!",
-            "Canın gitti ama vazgeçme, hadi devam!"
+            "Ah be, göremedin mi onu? Neyse sağlık olsun, devam edelim.",
+            "Nörüyon yavrum, ezdirme kendini şunlara. Az daha dikkatli bas.",
+            "O yılanı ben de fark etmedim orda. Canın sağ olsun, hadi toparlan.",
+            "Dur dur, acele etme. Bak bastın üstüne. Neyse olan oldu artık, önümüze bakalım."
         });
         DIYALOG_HAVUZU.put(DiyalogTetikleyici.KAZANMA, new String[]{
-            "Aferin! Tarla yılanlardan temizlendi!",
-            "İşte bu! Mehmet Emmi gurur duyuyor!",
-            "Helal olsun, yılanların hepsini buldun!",
-            "Bravo! Bu tarla artık güvende, çok iyisin!"
+            "Ellerine sağlık. Tarlayı tertemiz ettin, rahat bir nefes aldık sayende.",
+            "Helal olsun. Gerçekten iyi iş çıkardın, bu sene leblebiler bereketli olacak.",
+            "İşte bu kadar! Biliyordum zaten yapacağını, aslanım benim!"
         });
         DIYALOG_HAVUZU.put(DiyalogTetikleyici.KAYBETME, new String[]{
-            "Ah evladım, yılanlar kazandı bu sefer.",
-            "Üzme kendini, bir dahaki sefere daha dikkatli ol.",
-            "Tarla yılanlara kaldı... bir daha dene!",
-            "Bu yılanlar çok sinsi çıktı, hakkını yediler."
+            "Tarlayı yılanlara bıraktık bu sefer. Canın sağ olsun, yapacak bir şey yok.",
+            "Kısmet değilmiş. Kendini üzme hiç, yarın baştan başlarız.",
+            "Sağlık olsun, ne diyelim. Bu sefer onlar kazandı ama elbette tarlayı geri alacağız!",
+            "Çok zorladın ama olmadı. Yapacak birşey yok, senin canın sağ olsun."
         });
         DIYALOG_HAVUZU.put(DiyalogTetikleyici.ITEM_KULLANIMI, new String[]{
-            "Güzel hamle! İlaç yılanları ezer!",
-            "Karga geldi, yılanları görür o!",
-            "Saatim biraz tutmuyor ama devam et!",
-            "Para harcadın ama değer, hadi bakalım!"
+            "Al bakalım gülüm, işini görür.",
+            "Emminden sana feda olsun. Al da şu tarlayı temizle rahat rahat.",
+            "Bunlar hep işini kolaylaştırmak için. Dikkatli kullan ama boşa harcama."
+        });
+        DIYALOG_HAVUZU.put(DiyalogTetikleyici.KARGA_KULLANIMI, new String[]{
+            "Saldım bizim kargayı. Takip et bakalım nereyi gösterecek.",
+            "Bu karganın gözünden bir şey kaçmaz. İyi izle de tuzağa düşme."
+        });
+        DIYALOG_HAVUZU.put(DiyalogTetikleyici.SAAT_KULLANIMI, new String[]{
+            "Al şu yadigarı da biraz vaktin olsun. Panik yapmadan, sakin sakin oyna evladım.",
+            "Süreyi dert etme, saati ayarladım ben. Sen sadece önündekine odaklan."
+        });
+
+        DIYALOG_HAVUZU.put(DiyalogTetikleyici.ILAC_KULLANIMI, new String[]{
+            "Sık şunun zehrini de rahat edelim. Acıma hiç, bas ilacı gitsin!",
+            "Bu ilaç tam onlara göre. Sık da temizlensin ortalık!"
+        });
+
+        DIYALOG_HAVUZU.put(DiyalogTetikleyici.EKSTRA_KALP, new String[]{
+            "Al bir can daha, lazımdır sana. Ama daha dikkat et, ölme bir daha.",
+            "Demin ucuz atlattın. Al şu ekstra canı da içimiz rahat etsin biraz."
         });
     }
 
@@ -62,6 +78,7 @@ public class LeblebiBoardMode {
 
     private String               aktifDiyalog      = null;
     private DiyalogTetikleyici   aktifTetikleyici  = null;
+    
 
     private final Board tahta;
     private final int   baslangicSuresi;
@@ -77,7 +94,7 @@ public class LeblebiBoardMode {
     // Kalıcı eşya kullanımları (Seviye hesabı için)
     private int     kargaKullanimToplami;
     private int     ilacKullanimToplami;
-
+    private int harcananAltin;
     // Görev Sistemi
     public enum GorevTipi { HIZLI_BITIR, KARGA_YOK, COKLU_HUCRE, YILAN_AVCISI }
     public static class Gorev {
@@ -114,9 +131,9 @@ public class LeblebiBoardMode {
     private int altinIlerlemeSayaci = 0;
 
     public LeblebiBoardMode(int satirSayisi, int sutunSayisi,
-                             int solucanSayisi, int sureSaniye, int baslangicCan,
+                             int yilanSayisi, int sureSaniye, int baslangicCan,
                              int baslangicAltin, int toplamKargaKullanim, int toplamIlacKullanim) {
-        this.tahta           = new Board(satirSayisi, sutunSayisi, solucanSayisi);
+        this.tahta           = new Board(satirSayisi, sutunSayisi, yilanSayisi);
         this.tahta.setOnSafeCellOpened(this::hucrePuaniEkleBir);
         this.baslangicSuresi = sureSaniye;
         this.baslangicCan    = baslangicCan;
@@ -126,6 +143,7 @@ public class LeblebiBoardMode {
         this.altin           = baslangicAltin;
         this.kargaKullanimToplami = toplamKargaKullanim;
         this.ilacKullanimToplami  = toplamIlacKullanim;
+        this.harcananAltin = 0;
         this.oyunBitti       = false;
         this.kazanildi       = false;
         
@@ -189,6 +207,9 @@ public class LeblebiBoardMode {
         if (mineHit) {
             // Deduct a life
             canSayisi--;
+            // FIX 4: clear karga highlight on mine hit too — the recovery open
+            // would otherwise leave stale highlights on the board.
+            kargayiTemizle();
             if (canSayisi <= 0) {
                 canSayisi = 0;
                 oyunBitti = true;
@@ -234,12 +255,13 @@ public class LeblebiBoardMode {
     // ── Altın Sistemi ────────────────────────────────────────────────────────
 
     public void altinEkle(int miktar) {
-        altin += miktar;
+        this.altin += miktar;
     }
 
     public boolean altinHarca(int miktar) {
         if (altin >= miktar) {
-            altin -= miktar;
+            this.altin -= miktar;
+            this.harcananAltin += miktar;
             return true;
         }
         return false;
@@ -247,6 +269,10 @@ public class LeblebiBoardMode {
 
     public int getAltin() {
         return altin;
+    }
+
+    public int getHarcananAltin(){
+        return harcananAltin;
     }
 
     // ── Puan sistemi ─────────────────────────────────────────────────────────
@@ -265,9 +291,9 @@ public class LeblebiBoardMode {
 
         altinIlerlemeSayaci += miktar;
 
-        while (altinIlerlemeSayaci >= 4) {
+        while (altinIlerlemeSayaci >= 2) {
             altinEkle(1);
-            altinIlerlemeSayaci -= 4;
+            altinIlerlemeSayaci -= 2;
         }
     }
 
@@ -286,19 +312,36 @@ public class LeblebiBoardMode {
     }
 
     /**
-     * Karga (20 Altın): Seviyeye göre yılan(lar) gösterir.
+     * Karga result: distinguishes between three outcomes so the UI can show
+     * the correct feedback message.
      */
-    public java.util.List<int[]> kargaKullan() {
-        if (!altinHarca(20)) return null;
-        java.util.List<int[]> konumlar = tahta.kargaGorus(getKargaLevel(), sonTiklananSatir, sonTiklananSutun);
-        if (konumlar == null || konumlar.isEmpty()) {
-            altinEkle(20); // mayın yoksa iade
-            return null;
-        }
+    public enum KargaSonuc { BASARILI, YETERSIZ_ALTIN, MAYIN_YOK }
+
+    /**
+     * Karga (20 Altın): Seviyeye göre yılan(lar) gösterir.
+     *
+     * FIX 1: Gold is only charged after confirming mines exist, eliminating the
+     *        need for a refund path and the incorrect harcananAltin adjustment.
+     * FIX 2: kargaGosterilenMayinlar is replaced (not accumulated) on each use
+     *        so stale positions from a previous call never linger on the board.
+     * FIX 3: Returns a KargaSonuc so the caller can show the right dialog
+     *        (insufficient gold vs. no mines remaining).
+     */
+    public KargaSonuc kargaKullan() {
+        if (altin < 20) return KargaSonuc.YETERSIZ_ALTIN;
+
+        java.util.List<int[]> konumlar = tahta.kargaGorus(
+                getKargaLevel(), sonTiklananSatir, sonTiklananSutun);
+
+        if (konumlar == null || konumlar.isEmpty()) return KargaSonuc.MAYIN_YOK;
+
+        // Gold is only deducted once we know there is something to show.
+        altinHarca(20);
+        kargaGosterilenMayinlar.clear(); // FIX 2: replace, don't accumulate
         kargaGosterilenMayinlar.addAll(konumlar);
         kullanilanKarga++;
         kargaKullanimToplami++;
-        return konumlar;
+        return KargaSonuc.BASARILI;
     }
 
     public void kargayiTemizle() {
